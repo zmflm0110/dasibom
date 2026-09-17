@@ -135,7 +135,8 @@ LLM 배치 처리도 시험했지만 1.2배에 그쳐 기각했습니다. 복잡
   OS·앱·임베딩 모델과 같이 못 올립니다. 대신 검증층으로 작은 모델의 드리프트
   (한자 전환, 스키마 되뱉기)를 잡습니다.
 - **클릭 상호작용은 자동 검증을 못 했습니다.** 이 개발 환경에 macOS 전역 입력 자동화가
-  없어서, 데이터·API·렌더링까지만 확인했습니다.
+  없어서, 데이터·API·렌더링까지만 확인했습니다. 다만 폰 레이아웃은 스크린샷 대신
+  WebKit에서 DOM을 직접 측정해 9종 모두 확인했습니다 (`tests/mobile_layout.py`).
 - **네이티브 iOS 앱은 아닙니다.** 폰 쪽은 로컬 네트워크로 접속하는 웹 앱입니다.
 
 ## 테스트
@@ -155,3 +156,6 @@ for f in tests/test_*.py; do python3 "$f"; done
 | `test_monitor_sensitive.py` | 비밀번호 표시된 값 저장 안 함 |
 | `test_store_search.py` | 저장·검색·조합 |
 | `test_classifier.py` | 텍스트 종류 판별 |
+| `test_delete_cleanup.py` | 삭제 시 이미지 파일 정리 (공유 파일은 보존) |
+| `mobile_layout.py` | 폰 폭(390px) 실제 렌더링 측정 9종 |
+| `loadtest.py` | 3,000장 규모에서의 검색 지연 |

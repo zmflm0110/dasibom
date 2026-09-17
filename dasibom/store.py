@@ -99,9 +99,30 @@ def update_embedding(conn: sqlite3.Connection, clip_id: int, blob: bytes) -> Non
 
 
 def delete_clip(conn: sqlite3.Connection, clip_id: int) -> bool:
+    """Delete the row and, when nothing else points at it, the image file too.
+
+    Image filenames are content hashes, so two identical screenshots share one
+    file on disk. Deleting unconditionally would blank out the surviving clip's
+    thumbnail, so the file only goes when its last referrer does. Without this,
+    every delete leaked a file."""
+    row = conn.execute("SELECT image_path FROM clips WHERE id = ?", (clip_id,)).fetchone()
+    image_path = row["image_path"] if row else None
+
     cur = conn.execute("DELETE FROM clips WHERE id = ?", (clip_id,))
     conn.commit()
-    return cur.rowcount > 0
+    if cur.rowcount == 0:
+        return False
+
+    if image_path:
+        still_used = conn.execute(
+            "SELECT 1 FROM clips WHERE image_path = ? LIMIT 1", (image_path,)
+        ).fetchone()
+        if not still_used:
+            try:
+                (DB_PATH.parent / image_path).unlink(missing_ok=True)
+            except OSError:
+                pass  # a file we can't remove is a leak, not a failed delete
+    return True
 
 
 def content_hash(content: str) -> str:

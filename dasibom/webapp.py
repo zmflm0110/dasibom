@@ -11,6 +11,7 @@ import io
 import json
 import socket
 from pathlib import Path
+from typing import Optional
 
 from flask import Flask, Response, jsonify, request, send_file, send_from_directory
 from AppKit import NSPasteboard, NSPasteboardTypeString
@@ -34,6 +35,19 @@ UPCOMING_HORIZON_DAYS = 7  # how far ahead an event still counts as "다가오�
 
 app = Flask(__name__, static_folder=str(WEBUI_DIR / "static"), static_url_path="/static")
 pairing = Pairing()
+
+
+def _image_format(raw: bytes) -> Optional[str]:
+    """Return a normalized extension if the bytes really are an image."""
+    try:
+        from PIL import Image
+
+        with Image.open(io.BytesIO(raw)) as img:
+            img.verify()
+            fmt = (img.format or "").lower()
+    except Exception:
+        return None
+    return {"jpeg": "jpg", "png": "png", "webp": "webp", "heif": "heic", "gif": "gif"}.get(fmt)
 
 
 def lan_ip() -> str:
@@ -139,9 +153,13 @@ def api_create_image_clip():
     if len(raw) > MAX_IMAGE_BYTES:
         return jsonify({"ok": False, "error": "too_large"}), 413
 
-    ext = Path(file.filename or "").suffix.lower()
-    if ext not in (".png", ".jpg", ".jpeg", ".heic", ".webp"):
-        ext = ".png"
+    # Trusting the extension let a .txt file and 200 random bytes through as
+    # "screenshots" -- they stored fine and then rendered as broken images.
+    # Decode the actual bytes instead.
+    fmt = _image_format(raw)
+    if fmt is None:
+        return jsonify({"ok": False, "error": "not_an_image"}), 415
+    ext = f".{fmt}"
     digest = hashlib.sha256(raw).hexdigest()
     store.IMAGES_DIR.mkdir(parents=True, exist_ok=True)
     image_path = store.IMAGES_DIR / f"{digest}{ext}"
