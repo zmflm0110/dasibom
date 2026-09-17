@@ -29,6 +29,11 @@ check("너무 긴 라벨 거부", not understand._valid_label("반려동물병�
 check("정상 한국어 라벨 허용", understand._valid_label("면접준비"))
 check("짧은 영문 기술어 허용", understand._valid_label("API"))
 
+# 요약도 같은 드리프트를 겪는다 (배치 실행에서 "運動 루틴 정리" 관측)
+check("요약의 한자 드리프트 거부", not understand._valid_summary("運動 루틴 정리 및 세부사항"))
+check("정상 한국어 요약 허용", understand._valid_summary("운동 루틴 정리 및 세부사항"))
+check("빈 요약은 허용", understand._valid_summary(""))
+
 # --- JSON extraction tolerance ---
 check("코드펜스 감싼 JSON 파싱",
       understand._extract_json('```json\n{"label":"운동","summary":"s","tags":[]}\n```') is not None)

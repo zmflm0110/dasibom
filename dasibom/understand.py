@@ -86,6 +86,15 @@ _HANGUL = re.compile(r"[가-힣]")
 _CJK_IDEOGRAPH = re.compile(r"[一-鿿]")
 
 
+def _valid_summary(summary: str) -> bool:
+    """Same Chinese-drift guard as the label. Found in a batched run: the model
+    wrote "運動 루틴 정리" as a summary while the label was clean, so guarding
+    only the label let drift through to the part the user actually reads."""
+    if not summary:
+        return True  # a missing summary is acceptable; a wrong-language one is not
+    return not _CJK_IDEOGRAPH.search(summary)
+
+
 def _valid_label(label: str) -> bool:
     if not (2 <= len(label) <= 8):
         return False
@@ -140,6 +149,8 @@ def understand(ocr_text: str, max_tokens: int = 120,
             continue
 
         summary = str(parsed.get("summary", "")).strip()[:200]
+        if not _valid_summary(summary):
+            continue
         tags = parsed.get("tags") or []
         if isinstance(tags, str):
             tags = [tags]
