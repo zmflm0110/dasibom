@@ -5,6 +5,7 @@ but never calls out anywhere itself. The desktop app (pywebview, always on
 127.0.0.1) is trusted implicitly; any other device must pair with a PIN first
 -- see pairing.py.
 """
+import datetime
 import hashlib
 import io
 import json
@@ -29,6 +30,7 @@ TRUSTED_LOCAL_ADDRS = {"127.0.0.1", "::1"}
 MAX_IMAGE_BYTES = 15 * 1024 * 1024  # 15MB, generous for a phone screenshot
 RESURFACE_MIN_AGE_SECONDS = 3 * 24 * 3600  # only nudge about screenshots at least 3 days old
 RESURFACE_COUNT = 3
+UPCOMING_HORIZON_DAYS = 7  # how far ahead an event still counts as "다가오는"
 
 app = Flask(__name__, static_folder=str(WEBUI_DIR / "static"), static_url_path="/static")
 pairing = Pairing()
@@ -83,6 +85,7 @@ def _row_to_dict(row) -> dict:
         "summary": row["summary"],
         "tags": json.loads(row["tags"]) if row["tags"] else [],
         "understood": row["understood_at"] is not None,
+        "event_date": row["event_date"],
     }
 
 
@@ -174,13 +177,39 @@ def api_get_image(clip_id):
 
 @app.get("/api/resurface")
 def api_resurface():
-    """A handful of old "아이디어 스크린샷" clips to nudge the user back to --
-    the whole point of this feature: things get screenshotted and forgotten."""
+    """Two tiers, in order of how much they deserve attention:
+
+    1. 다가오는 일 -- a clip whose extracted event date is within the horizon.
+       A reservation two days out is worth interrupting for.
+    2. 잊힌 것 -- old, dateless clips the user never came back to. This is the
+       original nudge, and it only runs when tier 1 has nothing.
+    """
     conn = store.connect()
-    rows = store.resurface_candidates(conn, "image", RESURFACE_MIN_AGE_SECONDS, RESURFACE_COUNT)
-    if rows:
-        store.mark_surfaced(conn, [r["id"] for r in rows])
-    return jsonify([_row_to_dict(r) for r in rows])
+    today = datetime.date.today()
+    horizon = today + datetime.timedelta(days=UPCOMING_HORIZON_DAYS)
+
+    upcoming = store.upcoming_clips(conn, today.isoformat(), horizon.isoformat(), RESURFACE_COUNT)
+    items = []
+    for row in upcoming:
+        item = _row_to_dict(row)
+        event = datetime.date.fromisoformat(row["event_date"])
+        days = (event - today).days
+        item["reason"] = "오늘" if days == 0 else ("내일" if days == 1 else f"{days}일 뒤")
+        item["kind"] = "upcoming"
+        items.append(item)
+
+    if len(items) < RESURFACE_COUNT:
+        forgotten = store.resurface_candidates(
+            conn, "image", RESURFACE_MIN_AGE_SECONDS, RESURFACE_COUNT - len(items))
+        for row in forgotten:
+            item = _row_to_dict(row)
+            item["reason"] = "한동안 안 봤어요"
+            item["kind"] = "forgotten"
+            items.append(item)
+        if forgotten:
+            store.mark_surfaced(conn, [r["id"] for r in forgotten])
+
+    return jsonify(items)
 
 
 @app.get("/api/search")

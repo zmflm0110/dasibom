@@ -15,6 +15,7 @@ Reranking (optional second stage):
 
 No external API calls anywhere in this pipeline -- everything runs locally.
 """
+import json
 from typing import Optional
 
 import numpy as np
@@ -22,6 +23,33 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from . import store, embeddings, reranker
+
+# Bump when the text fed to the embedder changes shape, not just when the model
+# changes -- otherwise vectors built from raw OCR silently mix with vectors built
+# from AI summaries, and nothing errors because the dimension is identical.
+EMBED_TEXT_VERSION = "v2-summary"
+
+
+def searchable_text(row) -> str:
+    """What actually gets embedded for a clip.
+
+    Raw OCR is noisy ("instagram.com/saved", UI chrome, broken line wraps). The
+    AI summary and label are a cleaner statement of what the thing IS, so they
+    lead; the OCR stays as a tail so exact strings (prices, dates, names) remain
+    findable."""
+    keys = row.keys() if hasattr(row, "keys") else []
+    parts = []
+    if "label" in keys and row["label"]:
+        parts.append(row["label"])
+    if "summary" in keys and row["summary"]:
+        parts.append(row["summary"])
+    if "tags" in keys and row["tags"]:
+        try:
+            parts.extend(json.loads(row["tags"]))
+        except (json.JSONDecodeError, TypeError):
+            pass
+    parts.append(row["content"][:600])
+    return " / ".join(str(p) for p in parts if p)
 
 RERANK_CANDIDATE_MULTIPLIER = 4
 RERANK_CANDIDATE_MAX = 30
@@ -62,7 +90,7 @@ def _tfidf_search(conn, query: str, top_k: int, category: Optional[str]):
 
 
 def _embedding_search(conn, query: str, top_k: int, category: Optional[str]):
-    store.ensure_embedding_model(conn, embeddings.model_name())
+    store.ensure_embedding_model(conn, f"{embeddings.model_name()}#{EMBED_TEXT_VERSION}")
     rows = _filtered_rows(conn, category)
     if not rows:
         return []
@@ -77,7 +105,7 @@ def _embedding_search(conn, query: str, top_k: int, category: Optional[str]):
             missing_idx.append(i)
 
     if missing_idx:
-        new_vecs = embeddings.embed_passages([rows[i]["content"] for i in missing_idx])
+        new_vecs = embeddings.embed_passages([searchable_text(rows[i]) for i in missing_idx])
         for j, i in enumerate(missing_idx):
             vecs[i] = new_vecs[j]
             store.update_embedding(conn, rows[i]["id"], embeddings.to_blob(new_vecs[j]))

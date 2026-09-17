@@ -10,15 +10,20 @@ import urllib.request
 
 BASE = "http://127.0.0.1:8765"
 
+# One query per screenshot kind in the seed corpus. Every query is phrased the
+# way someone actually half-remembers a thing -- no keyword overlap with the
+# screenshot text, which is the whole point.
 CASES = [
-    ("몸 만들려면 뭐 했더라", "운동"),
-    ("밥 해먹을 때 참고할 것", "레시피"),
+    ("몸 만들려면 뭐 했더라", "운동 루틴"),
+    ("밥 해먹을 때 참고할 것", "토마토 파스타"),
     ("주말에 갈 만한 데", "전시회"),
-    ("커피 마실 곳", "카페"),
+    ("커피 마실 곳", "성수동 카페"),
     ("코딩하다 막혔을 때 본 거", "파이썬"),
     ("돈 관련해서 메모해둔 거", "환율"),
-    ("예약해둔 거 있었나", "예약"),
-    ("읽을 만한 책", "책"),
+    ("예약해둔 거 있었나", "예약 확인"),
+    ("엄마가 뭐 보낸다고 했는데", "엄마 카톡"),
+    ("면접 준비하면서 봤던 거", "면접 예상 질문"),
+    ("폰 케이스 사려고 봐뒀던 거", "아이폰 케이스"),
 ]
 
 

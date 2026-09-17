@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS clips (
     label TEXT,
     summary TEXT,
     tags TEXT,
-    understood_at REAL
+    understood_at REAL,
+    event_date TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_clips_hash ON clips(content_hash);
 CREATE INDEX IF NOT EXISTS idx_clips_category ON clips(category);
@@ -49,6 +50,7 @@ _MIGRATIONS = [
     ("summary", "TEXT"),
     ("tags", "TEXT"),
     ("understood_at", "REAL"),
+    ("event_date", "TEXT"),
 ]
 
 
@@ -140,12 +142,29 @@ def mark_surfaced(conn: sqlite3.Connection, clip_ids: list[int]) -> None:
     conn.commit()
 
 
+def set_event_date(conn: sqlite3.Connection, clip_id: int, iso_date: Optional[str]) -> None:
+    conn.execute("UPDATE clips SET event_date = ? WHERE id = ?", (iso_date, clip_id))
+    conn.commit()
+
+
+def upcoming_clips(conn: sqlite3.Connection, today_iso: str, horizon_iso: str, limit: int):
+    """Clips whose extracted event date falls between today and the horizon.
+
+    This is the resurface tier that actually earns attention: a reservation two
+    days out is worth interrupting for, a random old screenshot is not."""
+    return conn.execute(
+        "SELECT * FROM clips WHERE event_date IS NOT NULL AND event_date >= ? AND event_date <= ? "
+        "ORDER BY event_date ASC LIMIT ?",
+        (today_iso, horizon_iso, limit),
+    ).fetchall()
+
+
 def resurface_candidates(conn: sqlite3.Connection, category: str, min_age_seconds: float, limit: int):
-    """Oldest-first among clips that either were never surfaced before, or were
-    surfaced longest ago -- so the same couple of images don't get repeated."""
+    """Fallback tier: old clips with no date attached. Oldest-surfaced first so
+    the same couple of images don't get repeated."""
     cutoff = time.time() - min_age_seconds
     return conn.execute(
-        "SELECT * FROM clips WHERE category = ? AND created_at < ? "
+        "SELECT * FROM clips WHERE category = ? AND created_at < ? AND event_date IS NULL "
         "ORDER BY last_surfaced_at IS NOT NULL, last_surfaced_at ASC, RANDOM() LIMIT ?",
         (category, cutoff, limit),
     ).fetchall()
@@ -198,7 +217,9 @@ def pending_understanding(conn: sqlite3.Connection, limit: int = 20):
 def save_understanding(conn: sqlite3.Connection, clip_id: int, label: str,
                        summary: str, tags: list[str]) -> None:
     conn.execute(
-        "UPDATE clips SET label = ?, summary = ?, tags = ?, understood_at = ? WHERE id = ?",
+        # embedding = NULL: the summary just arrived, so the cached vector was
+        # built from raw OCR only and is now stale.
+        "UPDATE clips SET label = ?, summary = ?, tags = ?, understood_at = ?, embedding = NULL WHERE id = ?",
         (label, summary, json.dumps(tags, ensure_ascii=False), time.time(), clip_id),
     )
     conn.commit()

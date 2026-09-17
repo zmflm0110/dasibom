@@ -480,10 +480,16 @@ async function loadResurface() {
   }
   if (!items.length) return;
 
+  const anyUpcoming = items.some((r) => r.kind === "upcoming");
+  el("#resurface-title").textContent = anyUpcoming ? "⏰ 곧 다가와요" : "💡 잊고 있던 아이디어";
+
   el("#resurface-items").innerHTML = items.map((r) => `
-    <div class="resurface-card" data-id="${r.id}">
+    <div class="resurface-card ${r.kind === "upcoming" ? "upcoming" : ""}" data-id="${r.id}">
       <img src="/api/images/${r.id}" alt="">
-      <div class="resurface-caption">${escapeHTML(r.content).trim().slice(0, 60)}</div>
+      <div class="resurface-caption">
+        ${r.reason ? `<span class="resurface-reason">${escapeHTML(r.reason)}</span>` : ""}
+        ${escapeHTML(r.summary || r.content).trim().slice(0, 50)}
+      </div>
     </div>
   `).join("");
 

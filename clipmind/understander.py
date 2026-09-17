@@ -9,7 +9,7 @@ which the UI polls and shows as it arrives.
 import threading
 import time
 
-from . import store, topics, understand
+from . import dates, store, topics, understand
 
 IDLE_SLEEP_SECONDS = 3.0
 BATCH_SIZE = 4
@@ -24,6 +24,12 @@ def process_batch(conn, limit: int = BATCH_SIZE, verbose: bool = False) -> int:
     known_labels = store.distinct_labels(conn)
     processed = 0
     for row in rows:
+        # Dates come from the raw OCR, not the summary: the summary may drop
+        # "10월 3일" while paraphrasing, and a missed date means a missed nudge.
+        event_date = dates.extract_event_date(row["content"])
+        if event_date:
+            store.set_event_date(conn, row["id"], event_date.isoformat())
+
         try:
             result = understand.understand(row["content"], existing_labels=known_labels)
         except Exception as e:
