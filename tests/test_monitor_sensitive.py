@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from clipmind.monitor import _is_sensitive
+from dasibom.monitor import _is_sensitive
 
 
 class FakePasteboard:

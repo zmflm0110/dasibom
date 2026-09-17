@@ -3,7 +3,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from clipmind.pairing import Pairing, generate_pin
+from dasibom.pairing import Pairing, generate_pin
 
 results = []
 

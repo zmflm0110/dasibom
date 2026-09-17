@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from clipmind.topics import classify_topic, display_name
+from dasibom.topics import classify_topic, display_name
 
 CASES = [
     ("성수동 카페 추천\n연무장길 로스터리, 아메리카노 4500원", "food"),

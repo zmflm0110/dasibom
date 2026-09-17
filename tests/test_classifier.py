@@ -3,7 +3,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from clipmind.classifier import classify
+from dasibom.classifier import classify
 
 
 def check(text, expected_category, expected_subtype=None):

@@ -1,7 +1,7 @@
 """End-to-end recall test: colloquial Korean queries against a live server.
 
 These are the exact queries that failed before the e5-small swap and the topic
-layer (raw embedding top-1 was 3/8). Run the app first:  python3 -m clipmind.app
+layer (raw embedding top-1 was 3/8). Run the app first:  python3 -m dasibom.app
 """
 import json
 import sys

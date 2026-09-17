@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from clipmind import store
+from dasibom import store
 
 tmp_dir = tempfile.mkdtemp()
 conn = store.connect(Path(tmp_dir) / "test.db")

@@ -1,6 +1,6 @@
 """다시봄 — 찍어두고 잊은 것을 다시 꺼내주는 앱.
 
-    python3 -m clipmind.app
+    python3 -m dasibom.app
 
 Runs three things in one process: the local web server, the native window that
 renders it, and the background worker that reads new screenshots with the local

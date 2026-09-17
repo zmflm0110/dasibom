@@ -63,12 +63,12 @@ function escapeHTML(s) {
 // same WiFi must pair once (QR scan or manual PIN) to get a bearer token.
 
 function getToken() {
-  try { return localStorage.getItem("clipmind_token"); } catch { return null; }
+  try { return localStorage.getItem("dasibom_token"); } catch { return null; }
 }
 function setToken(token) {
-  try { localStorage.setItem("clipmind_token", token); } catch { /* ignore */ }
+  try { localStorage.setItem("dasibom_token", token); } catch { /* ignore */ }
   // Also as a cookie: <img src="/api/images/N"> can't send an Authorization header.
-  document.cookie = `clipmind_token=${token}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+  document.cookie = `dasibom_token=${token}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
 }
 
 async function api(path, opts = {}) {

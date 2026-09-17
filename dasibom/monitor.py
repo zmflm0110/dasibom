@@ -62,7 +62,7 @@ def poll_tick(pb, conn, last_change_count: int, verbose: bool = True) -> int:
         return cc
     if _is_sensitive(pb):
         if verbose:
-            print("[clipmind] skipped (marked sensitive by source app)", flush=True)
+            print("[다시봄] skipped (marked sensitive by source app)", flush=True)
         return cc
     text = _read_pasteboard_string(pb)
     if text:
@@ -72,7 +72,7 @@ def poll_tick(pb, conn, last_change_count: int, verbose: bool = True) -> int:
         new_id = store.add_clip(conn, text, category, subtype, app_name)
         if verbose and new_id:
             preview = text.replace("\n", " ")[:60]
-            print(f"[clipmind] #{new_id} [{category}{'/' + subtype if subtype else ''}] "
+            print(f"[다시봄] #{new_id} [{category}{'/' + subtype if subtype else ''}] "
                   f"({app_name}) {preview!r}", flush=True)
     return cc
 
@@ -83,7 +83,7 @@ def run(poll_interval: float = POLL_INTERVAL, max_iterations: int | None = None,
     last_change_count = pb.changeCount()
 
     if verbose:
-        print(f"[clipmind] monitoring started (poll={poll_interval}s, db={store.DB_PATH})", flush=True)
+        print(f"[다시봄] monitoring started (poll={poll_interval}s, db={store.DB_PATH})", flush=True)
 
     iterations = 0
     try:
@@ -95,7 +95,7 @@ def run(poll_interval: float = POLL_INTERVAL, max_iterations: int | None = None,
                 break
     except KeyboardInterrupt:
         if verbose:
-            print("\n[clipmind] stopped", flush=True)
+            print("\n[다시봄] stopped", flush=True)
     finally:
         conn.close()
 

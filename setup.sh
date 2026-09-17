@@ -16,9 +16,9 @@ echo "필요한 패키지 설치 중 (처음 실행 시 로컬 AI 모델 약 2.2
 
 echo ""
 echo "설치 완료. 실행하려면:"
-echo "  ./venv/bin/python3 -m clipmind.app     # 다시봄 실행"
+echo "  ./venv/bin/python3 -m dasibom.app     # 다시봄 실행"
 echo ""
 
 if [ "${1:-}" = "--run" ]; then
-  exec ./venv/bin/python3 -m clipmind.app
+  exec ./venv/bin/python3 -m dasibom.app
 fi

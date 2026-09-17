@@ -4,10 +4,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from clipmind import store
-from clipmind.classifier import classify
-from clipmind.search import semantic_search, keyword_search
-from clipmind.combine import combine_clips
+from dasibom import store
+from dasibom.classifier import classify
+from dasibom.search import semantic_search, keyword_search
+from dasibom.combine import combine_clips
 
 tmp_dir = tempfile.mkdtemp()
 db_path = Path(tmp_dir) / "test.db"
@@ -45,7 +45,7 @@ print("stats:", s)
 assert s["total"] == len(SAMPLES)
 print("PASS  stats total matches insert count")
 
-from clipmind import embeddings as _emb
+from dasibom import embeddings as _emb
 
 print(f"\nembedding backend available: {_emb.is_available()}")
 
@@ -70,7 +70,7 @@ assert results2 and results2[0][0]["id"] == ids[6], "top result should be the lu
 print("PASS  semantic search correctly ranks Korean natural-language query")
 
 if _emb.is_available():
-    from clipmind import reranker as _rerank
+    from dasibom import reranker as _rerank
 
     print("\n--- semantic_search('로그인 인증 토큰 발급하는 코드') [no literal token overlap test] ---")
     results3 = semantic_search(conn, "로그인 인증 토큰 발급하는 코드", top_k=3, category="code")

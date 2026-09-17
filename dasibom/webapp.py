@@ -58,7 +58,7 @@ def _is_trusted_request() -> bool:
         return True
     # <img src> can't carry an Authorization header, so the paired phone also
     # keeps the token in a cookie -- same token, same trust level.
-    return pairing.is_valid_token(request.cookies.get("clipmind_token"))
+    return pairing.is_valid_token(request.cookies.get("dasibom_token"))
 
 
 @app.before_request

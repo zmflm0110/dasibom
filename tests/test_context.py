@@ -3,8 +3,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from clipmind.context import infer_language_from_title, infer_context_category, frontmost_window_title
-import clipmind.context as context_mod
+from dasibom.context import infer_language_from_title, infer_context_category, frontmost_window_title
+import dasibom.context as context_mod
 
 cases = [
     ("app.py — ClipMind", "python"),

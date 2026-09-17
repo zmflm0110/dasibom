@@ -87,7 +87,7 @@ def cmd_stats(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="clipmind")
+    parser = argparse.ArgumentParser(prog="dasibom")
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("start", help="run the clipboard monitor daemon")

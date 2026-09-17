@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 from typing import Optional
 
-DB_PATH = Path(__file__).resolve().parent.parent / "data" / "clipboard.db"
+DB_PATH = Path(__file__).resolve().parent.parent / "data" / "dasibom.db"
 IMAGES_DIR = DB_PATH.parent / "images"
 
 SCHEMA = """

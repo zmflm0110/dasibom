@@ -4,7 +4,7 @@ Everything here re-measures against a live server rather than quoting figures
 from a commit message, so a claim that goes stale fails loudly instead of
 quietly surviving into a slide.
 
-    python3 -m clipmind.app      # in one terminal
+    python3 -m dasibom.app      # in one terminal
     python3 tests/benchmark.py   # in another
 """
 import json

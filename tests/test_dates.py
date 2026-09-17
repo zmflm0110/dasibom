@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from clipmind.dates import extract_event_date, days_until
+from dasibom.dates import extract_event_date, days_until
 
 TODAY = datetime.date(2026, 9, 17)
 
