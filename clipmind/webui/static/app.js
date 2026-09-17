@@ -1,4 +1,5 @@
 const CATEGORY_META = {
+  image:        { label: "아이디어",   color: "orange" },
   url:          { label: "링크",       color: "blue" },
   email:        { label: "이메일",     color: "purple" },
   path:         { label: "경로",       color: "gray" },
@@ -63,6 +64,8 @@ function getToken() {
 }
 function setToken(token) {
   try { localStorage.setItem("clipmind_token", token); } catch { /* ignore */ }
+  // Also as a cookie: <img src="/api/images/N"> can't send an Authorization header.
+  document.cookie = `clipmind_token=${token}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
 }
 
 async function api(path, opts = {}) {
@@ -170,6 +173,7 @@ function clipRowHTML(clip, score) {
   const preview = escapeHTML(clip.content).trim();
   const selected = state.selected.has(clip.id);
   const expanded = state.expanded.has(clip.id);
+  const thumb = clip.has_image ? `<img class="clip-thumb" src="/api/images/${clip.id}" alt="">` : "";
   return `
     <div class="clip-row ${selected ? "selected" : ""} ${expanded ? "expanded" : ""}" data-id="${clip.id}">
       <div class="clip-check" data-role="check">${selected ? "✓" : ""}</div>
@@ -180,6 +184,7 @@ function clipRowHTML(clip, score) {
           ${score !== undefined && score !== null ? `<span class="clip-score">${score}</span>` : ""}
           <span class="clip-time">${relTime(clip.created_at)}</span>
         </div>
+        ${thumb}
         <div class="clip-preview ${isCode ? "code" : ""}">${preview}</div>
       </div>
       <div class="clip-actions">
@@ -347,6 +352,66 @@ el("#suggest-btn").addEventListener("click", async () => {
 });
 el("#suggest-close").addEventListener("click", () => { el("#suggest-banner").hidden = true; });
 
+// ---------- Quick add (phone paste -> send, since iOS won't let us watch the
+// clipboard automatically -- see the modal's own explanation text) ----------
+
+el("#quickadd-btn").addEventListener("click", () => {
+  el("#quickadd-modal").hidden = false;
+  el("#quickadd-text").value = "";
+  el("#quickadd-text").focus();
+});
+el("#quickadd-close").addEventListener("click", () => { el("#quickadd-modal").hidden = true; });
+
+el("#quickadd-image").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const status = el("#quickadd-status");
+  status.hidden = false;
+  status.textContent = "글자를 읽는 중…";
+
+  const form = new FormData();
+  form.append("image", file);
+  const token = getToken();
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+  try {
+    const res = await fetch("/api/clips/image", { method: "POST", body: form, headers });
+    if (res.status === 401) { showPairOverlay(); return; }
+    const data = await res.json();
+    if (!data.ok) {
+      status.textContent = data.error === "too_large" ? "이미지가 너무 커요 (15MB 제한)" : "추가하지 못했어요";
+      return;
+    }
+    el("#quickadd-modal").hidden = true;
+    status.hidden = true;
+    showToast(data.ocr_text ? "아이디어 저장됨 (글자도 읽었어요)" : "이미지 저장됨");
+    loadStats();
+    loadClips();
+  } catch {
+    status.textContent = "추가하지 못했어요";
+  } finally {
+    e.target.value = "";
+  }
+});
+
+el("#quickadd-submit").addEventListener("click", async () => {
+  const content = el("#quickadd-text").value.trim();
+  if (!content) return;
+  try {
+    await api("/api/clips", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content }),
+    });
+    el("#quickadd-modal").hidden = true;
+    showToast("추가됨");
+    loadStats();
+    loadClips();
+  } catch (e) {
+    if (e.message !== "pairing_required") throw e;
+  }
+});
+
 // ---------- Phone-connect modal (shown from the desktop app only: /api/pair-info
 // and /api/qr.png only answer to localhost, so this just no-ops on a phone) ----------
 
@@ -363,6 +428,41 @@ el("#phone-connect-btn").addEventListener("click", async () => {
 });
 el("#phone-modal-close").addEventListener("click", () => { el("#phone-modal").hidden = true; });
 
+// ---------- Resurface: old idea screenshots you never went back to ----------
+
+async function loadResurface() {
+  let items;
+  try {
+    items = await api("/api/resurface");
+  } catch (e) {
+    if (e.message !== "pairing_required") throw e;
+    return;
+  }
+  if (!items.length) return;
+
+  el("#resurface-items").innerHTML = items.map((r) => `
+    <div class="resurface-card" data-id="${r.id}">
+      <img src="/api/images/${r.id}" alt="">
+      <div class="resurface-caption">${escapeHTML(r.content).trim().slice(0, 60)}</div>
+    </div>
+  `).join("");
+
+  el("#resurface-items").querySelectorAll(".resurface-card").forEach((node) => {
+    node.addEventListener("click", () => {
+      const id = Number(node.dataset.id);
+      state.expanded.add(id);
+      el("#resurface-banner").hidden = true;
+      loadClips().then(() => {
+        const row = listEl.querySelector(`.clip-row[data-id="${id}"]`);
+        if (row) row.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    });
+  });
+  el("#resurface-banner").hidden = false;
+}
+
+el("#resurface-close").addEventListener("click", () => { el("#resurface-banner").hidden = true; });
+
 // ---------- Boot ----------
 
 async function boot() {
@@ -377,6 +477,7 @@ async function boot() {
 (async () => {
   await autoPairFromURL();
   await boot();
+  await loadResurface();
 })();
 
 // Light polling so the UI stays live as new clips come in from the background monitor.

@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "clipboard.db"
+IMAGES_DIR = DB_PATH.parent / "images"
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS clips (
@@ -17,12 +18,22 @@ CREATE TABLE IF NOT EXISTS clips (
     source_app TEXT,
     created_at REAL NOT NULL,
     char_count INTEGER NOT NULL,
-    embedding BLOB
+    embedding BLOB,
+    image_path TEXT,
+    last_surfaced_at REAL
 );
 CREATE INDEX IF NOT EXISTS idx_clips_hash ON clips(content_hash);
 CREATE INDEX IF NOT EXISTS idx_clips_category ON clips(category);
 CREATE INDEX IF NOT EXISTS idx_clips_created ON clips(created_at);
 """
+
+# Columns added after the initial release -- kept as a list so connect() can
+# migrate existing databases in place instead of requiring a fresh one.
+_MIGRATIONS = [
+    ("embedding", "BLOB"),
+    ("image_path", "TEXT"),
+    ("last_surfaced_at", "REAL"),
+]
 
 
 def connect(db_path: Path = DB_PATH) -> sqlite3.Connection:
@@ -31,9 +42,10 @@ def connect(db_path: Path = DB_PATH) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
     cols = {row["name"] for row in conn.execute("PRAGMA table_info(clips)")}
-    if "embedding" not in cols:
-        conn.execute("ALTER TABLE clips ADD COLUMN embedding BLOB")
-        conn.commit()
+    for name, sql_type in _MIGRATIONS:
+        if name not in cols:
+            conn.execute(f"ALTER TABLE clips ADD COLUMN {name} {sql_type}")
+    conn.commit()
     return conn
 
 
@@ -58,6 +70,7 @@ def add_clip(
     category: str,
     subtype: Optional[str] = None,
     source_app: Optional[str] = None,
+    image_path: Optional[str] = None,
 ) -> Optional[int]:
     """Insert a clip. Skips exact duplicate of the most recent clip. Returns new row id, or None if skipped."""
     h = content_hash(content)
@@ -67,12 +80,32 @@ def add_clip(
     if row is not None and row["content_hash"] == h:
         return None
     cur = conn.execute(
-        "INSERT INTO clips (content, content_hash, category, subtype, source_app, created_at, char_count) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (content, h, category, subtype, source_app, time.time(), len(content)),
+        "INSERT INTO clips (content, content_hash, category, subtype, source_app, created_at, char_count, image_path) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (content, h, category, subtype, source_app, time.time(), len(content), image_path),
     )
     conn.commit()
     return cur.lastrowid
+
+
+def mark_surfaced(conn: sqlite3.Connection, clip_ids: list[int]) -> None:
+    now = time.time()
+    conn.executemany(
+        "UPDATE clips SET last_surfaced_at = ? WHERE id = ?",
+        [(now, cid) for cid in clip_ids],
+    )
+    conn.commit()
+
+
+def resurface_candidates(conn: sqlite3.Connection, category: str, min_age_seconds: float, limit: int):
+    """Oldest-first among clips that either were never surfaced before, or were
+    surfaced longest ago -- so the same couple of images don't get repeated."""
+    cutoff = time.time() - min_age_seconds
+    return conn.execute(
+        "SELECT * FROM clips WHERE category = ? AND created_at < ? "
+        "ORDER BY last_surfaced_at IS NOT NULL, last_surfaced_at ASC, RANDOM() LIMIT ?",
+        (category, cutoff, limit),
+    ).fetchall()
 
 
 def list_clips(conn: sqlite3.Connection, limit: int = 20, category: Optional[str] = None):

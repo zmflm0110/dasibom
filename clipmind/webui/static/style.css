@@ -562,6 +562,101 @@ html, body {
   color: var(--text);
 }
 
+/* ---------- Idea screenshots ---------- */
+
+.quickadd-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 16px 0 12px;
+  color: var(--text-faint);
+  font-size: 12px;
+}
+.quickadd-divider::before,
+.quickadd-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.image-picker-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+.image-picker-btn:hover { background: var(--bg-hover); color: var(--text); border-color: var(--accent); }
+
+.clip-thumb {
+  max-width: 320px;
+  max-height: 104px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  margin-bottom: 6px;
+  display: block;
+}
+.clip-row.expanded .clip-thumb { max-width: 100%; max-height: 520px; }
+
+.resurface-banner {
+  margin: 4px 28px 0;
+  background: rgba(191, 135, 0, 0.1);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.resurface-banner .suggest-banner-head { color: #9a6700; }
+
+.resurface-items {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.resurface-card {
+  flex: none;
+  width: 130px;
+  cursor: pointer;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.resurface-card:hover { border-color: var(--accent); }
+.resurface-card img {
+  width: 100%;
+  height: 78px;
+  object-fit: cover;
+  display: block;
+}
+.resurface-card .resurface-caption {
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 5px 7px;
+  line-height: 1.35;
+  max-height: 3.2em;
+  overflow: hidden;
+}
+
+.quickadd-textarea {
+  width: 100%;
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-code);
+  color: var(--text);
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+}
+.quickadd-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
 .pair-input {
   width: 100%;
   font-size: 24px;
@@ -608,8 +703,9 @@ html, body {
   .nav-item { flex: none; padding: 6px 10px; }
   .nav-item-label span.label-text { display: inline; font-size: 12.5px; }
   .phone-connect-btn, .sidebar-footer { display: none; }
-  .topbar { padding: 10px 14px 6px; }
-  .search-wrap { max-width: none; }
+  .topbar { padding: 10px 14px 6px; flex-wrap: wrap; }
+  .search-wrap { max-width: none; flex-basis: 100%; }
+  .ghost-btn { padding: 7px 10px; font-size: 12.5px; }
   .list-head { padding: 10px 14px 4px; font-size: 17px; }
   .clip-list { padding: 2px 10px calc(90px + env(safe-area-inset-bottom)); }
   .clip-actions { opacity: 1; }

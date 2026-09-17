@@ -5,14 +5,17 @@ but never calls out anywhere itself. The desktop app (pywebview, always on
 127.0.0.1) is trusted implicitly; any other device must pair with a PIN first
 -- see pairing.py.
 """
+import hashlib
 import io
 import socket
 from pathlib import Path
 
-from flask import Flask, Response, jsonify, request, send_from_directory
+from flask import Flask, Response, jsonify, request, send_file, send_from_directory
 from AppKit import NSPasteboard, NSPasteboardTypeString
 
-from . import store
+from . import store, monitor
+from .classifier import classify
+from .ocr import extract_text
 from .search import semantic_search, keyword_search
 from .combine import combine_clips
 from .context import suggest as context_suggest
@@ -21,6 +24,9 @@ from .pairing import Pairing
 WEBUI_DIR = Path(__file__).resolve().parent / "webui"
 PORT = 8765
 TRUSTED_LOCAL_ADDRS = {"127.0.0.1", "::1"}
+MAX_IMAGE_BYTES = 15 * 1024 * 1024  # 15MB, generous for a phone screenshot
+RESURFACE_MIN_AGE_SECONDS = 3 * 24 * 3600  # only nudge about screenshots at least 3 days old
+RESURFACE_COUNT = 3
 
 app = Flask(__name__, static_folder=str(WEBUI_DIR / "static"), static_url_path="/static")
 pairing = Pairing()
@@ -44,8 +50,11 @@ def _is_trusted_request() -> bool:
     if request.remote_addr in TRUSTED_LOCAL_ADDRS:
         return True
     auth = request.headers.get("Authorization", "")
-    token = auth[len("Bearer "):] if auth.startswith("Bearer ") else None
-    return pairing.is_valid_token(token)
+    if auth.startswith("Bearer ") and pairing.is_valid_token(auth[len("Bearer "):]):
+        return True
+    # <img src> can't carry an Authorization header, so the paired phone also
+    # keeps the token in a cookie -- same token, same trust level.
+    return pairing.is_valid_token(request.cookies.get("clipmind_token"))
 
 
 @app.before_request
@@ -65,6 +74,7 @@ def _row_to_dict(row) -> dict:
         "source_app": row["source_app"],
         "created_at": row["created_at"],
         "char_count": row["char_count"],
+        "has_image": bool(row["image_path"]),
     }
 
 
@@ -79,6 +89,81 @@ def api_clips():
     category = request.args.get("category") or None
     limit = int(request.args.get("limit", 100))
     rows = store.list_clips(conn, limit=limit, category=category)
+    return jsonify([_row_to_dict(r) for r in rows])
+
+
+@app.post("/api/clips")
+def api_create_clip():
+    """Manual add -- mainly for the phone's "붙여넣기 → 보내기" box. iOS gives no
+    app (native or web) a way to observe clipboard changes in the background, so
+    this explicit paste-and-send is the only reliable phone -> Mac path."""
+    data = request.get_json(force=True, silent=True) or {}
+    content = (data.get("content") or "").strip()[:monitor.MAX_CONTENT_CHARS]
+    if not content:
+        return jsonify({"ok": False, "error": "empty"}), 400
+    conn = store.connect()
+    category, subtype = classify(content)
+    source = "Mac (직접 추가)" if request.remote_addr in TRUSTED_LOCAL_ADDRS else "iPhone"
+    new_id = store.add_clip(conn, content, category, subtype, source_app=source)
+    return jsonify({"ok": True, "id": new_id})
+
+
+@app.post("/api/clips/image")
+def api_create_image_clip():
+    """"아이디어 스크린샷" intake: phone picks an image (from its Photos library
+    via the native file picker) and we OCR it locally with Vision so it becomes
+    searchable text like everything else, plus keep the picture for the
+    resurface nudge."""
+    file = request.files.get("image")
+    if not file:
+        return jsonify({"ok": False, "error": "no file"}), 400
+    raw = file.read(MAX_IMAGE_BYTES + 1)
+    if not raw:
+        return jsonify({"ok": False, "error": "empty"}), 400
+    if len(raw) > MAX_IMAGE_BYTES:
+        return jsonify({"ok": False, "error": "too_large"}), 413
+
+    ext = Path(file.filename or "").suffix.lower()
+    if ext not in (".png", ".jpg", ".jpeg", ".heic", ".webp"):
+        ext = ".png"
+    digest = hashlib.sha256(raw).hexdigest()
+    store.IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+    image_path = store.IMAGES_DIR / f"{digest}{ext}"
+    if not image_path.exists():
+        image_path.write_bytes(raw)
+
+    ocr_text = extract_text(image_path).strip()
+    content = ocr_text if ocr_text else "(텍스트 없는 이미지)"
+    source = "Mac (직접 추가)" if request.remote_addr in TRUSTED_LOCAL_ADDRS else "iPhone"
+
+    conn = store.connect()
+    new_id = store.add_clip(
+        conn, content, category="image", subtype=None, source_app=source,
+        image_path=str(image_path.relative_to(store.IMAGES_DIR.parent)),
+    )
+    return jsonify({"ok": True, "id": new_id, "ocr_text": ocr_text})
+
+
+@app.get("/api/images/<int:clip_id>")
+def api_get_image(clip_id):
+    conn = store.connect()
+    row = store.get_clip(conn, clip_id)
+    if not row or not row["image_path"]:
+        return Response(status=404)
+    path = store.DB_PATH.parent / row["image_path"]
+    if not path.exists():
+        return Response(status=404)
+    return send_file(path)
+
+
+@app.get("/api/resurface")
+def api_resurface():
+    """A handful of old "아이디어 스크린샷" clips to nudge the user back to --
+    the whole point of this feature: things get screenshotted and forgotten."""
+    conn = store.connect()
+    rows = store.resurface_candidates(conn, "image", RESURFACE_MIN_AGE_SECONDS, RESURFACE_COUNT)
+    if rows:
+        store.mark_surfaced(conn, [r["id"] for r in rows])
     return jsonify([_row_to_dict(r) for r in rows])
 
 

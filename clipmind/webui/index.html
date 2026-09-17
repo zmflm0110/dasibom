@@ -48,6 +48,15 @@
         <button id="search-clear" class="search-clear" hidden>✕</button>
       </div>
       <button id="suggest-btn" class="ghost-btn" title="지금 보고 있는 앱에 맞춰 추천">✦ 추천</button>
+      <button id="quickadd-btn" class="ghost-btn" title="붙여넣은 내용을 바로 추가">+ 추가</button>
+    </div>
+
+    <div id="resurface-banner" class="resurface-banner" hidden>
+      <div class="suggest-banner-head">
+        <span>💡 잊고 있던 아이디어</span>
+        <button id="resurface-close" class="icon-btn">✕</button>
+      </div>
+      <div id="resurface-items" class="resurface-items"></div>
     </div>
 
     <div id="suggest-banner" class="suggest-banner" hidden>
@@ -96,6 +105,30 @@
         </div>
         <p class="modal-hint">QR을 못 찍으면 위 주소를 폰 브라우저에 직접 입력하고, PIN
           <strong id="phone-pin">——————</strong> 을 입력하세요.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="quickadd-modal" class="modal-overlay" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <span>+ 클립 추가</span>
+        <button id="quickadd-close" class="icon-btn">✕</button>
+      </div>
+      <div class="modal-body" style="align-items:stretch;">
+        <p class="modal-hint" style="text-align:left;">iOS는 앱(네이티브 포함)이 클립보드를
+          몰래 감시하는 걸 막아둬서, 자동으로는 안 올라와요. 아래에 붙여넣고 보내면 바로
+          추가됩니다.</p>
+        <textarea id="quickadd-text" class="quickadd-textarea" placeholder="여기에 길게 눌러 붙여넣기…" rows="5"></textarea>
+        <button id="quickadd-submit" class="primary-btn" style="width:100%;margin-top:10px;">텍스트 보내기</button>
+
+        <div class="quickadd-divider"><span>또는</span></div>
+
+        <p class="modal-hint" style="text-align:left;margin:0 0 8px;">인스타에서 찍어둔 아이디어
+          스크린샷을 올리면, 이미지 속 글자를 자동으로 읽어서(OCR) 나중에 검색할 수 있게 됩니다.</p>
+        <label for="quickadd-image" class="image-picker-btn">🖼 스크린샷 선택</label>
+        <input id="quickadd-image" type="file" accept="image/*" hidden>
+        <p id="quickadd-status" class="modal-hint" hidden></p>
       </div>
     </div>
   </div>
