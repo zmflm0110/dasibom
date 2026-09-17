@@ -54,10 +54,73 @@ function escapeHTML(s) {
   }[c]));
 }
 
-async function api(path, opts) {
-  const res = await fetch(path, opts);
+// ---------- Auth (LAN phone pairing) ----------
+// The Mac desktop app talks to 127.0.0.1 and never needs this. A phone on the
+// same WiFi must pair once (QR scan or manual PIN) to get a bearer token.
+
+function getToken() {
+  try { return localStorage.getItem("clipmind_token"); } catch { return null; }
+}
+function setToken(token) {
+  try { localStorage.setItem("clipmind_token", token); } catch { /* ignore */ }
+}
+
+async function api(path, opts = {}) {
+  const token = getToken();
+  const headers = Object.assign({}, opts.headers);
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(path, { ...opts, headers });
+  if (res.status === 401) {
+    showPairOverlay();
+    throw new Error("pairing_required");
+  }
   return res.json();
 }
+
+function showPairOverlay() {
+  el("#pair-overlay").hidden = false;
+}
+
+async function tryPair(pin) {
+  const res = await fetch("/api/pair", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pin }),
+  });
+  if (!res.ok) return false;
+  const data = await res.json();
+  if (!data.ok) return false;
+  setToken(data.token);
+  return true;
+}
+
+async function autoPairFromURL() {
+  const params = new URLSearchParams(location.search);
+  const pin = params.get("pin");
+  if (!pin) return;
+  const ok = await tryPair(pin);
+  // Strip the PIN from the visible URL / history either way, so it's never
+  // sitting in the address bar or bookmarks.
+  const clean = new URL(location.href);
+  clean.searchParams.delete("pin");
+  history.replaceState({}, "", clean.pathname + clean.search);
+  if (ok) showToast("연결됨");
+}
+
+el("#pair-submit").addEventListener("click", async () => {
+  const pin = el("#pair-pin-input").value.trim();
+  const ok = await tryPair(pin);
+  if (ok) {
+    el("#pair-overlay").hidden = true;
+    el("#pair-error").hidden = true;
+    boot();
+  } else {
+    el("#pair-error").hidden = false;
+  }
+});
+el("#pair-pin-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") el("#pair-submit").click();
+});
 
 function showToast(msg) {
   const t = el("#toast");
@@ -284,18 +347,47 @@ el("#suggest-btn").addEventListener("click", async () => {
 });
 el("#suggest-close").addEventListener("click", () => { el("#suggest-banner").hidden = true; });
 
+// ---------- Phone-connect modal (shown from the desktop app only: /api/pair-info
+// and /api/qr.png only answer to localhost, so this just no-ops on a phone) ----------
+
+el("#phone-connect-btn").addEventListener("click", async () => {
+  try {
+    const info = await api("/api/pair-info");
+    el("#phone-qr").src = `/api/qr.png?_=${Date.now()}`;
+    el("#phone-url").textContent = info.hostname_url || info.lan_url;
+    el("#phone-pin").textContent = info.pin;
+    el("#phone-modal").hidden = false;
+  } catch {
+    showToast("폰 연결 정보는 컴퓨터 앱에서만 볼 수 있어요");
+  }
+});
+el("#phone-modal-close").addEventListener("click", () => { el("#phone-modal").hidden = true; });
+
 // ---------- Boot ----------
 
 async function boot() {
-  await loadStats();
-  await loadClips();
+  try {
+    await loadStats();
+    await loadClips();
+  } catch (e) {
+    if (e.message !== "pairing_required") throw e;
+  }
 }
-boot();
+
+(async () => {
+  await autoPairFromURL();
+  await boot();
+})();
 
 // Light polling so the UI stays live as new clips come in from the background monitor.
 setInterval(async () => {
-  await loadStats();
-  if (!state.searchQuery && document.activeElement !== searchInput) {
-    if (!searchInput.value) loadClips();
+  if (!getToken() && !el("#pair-overlay").hidden) return; // not paired yet, nothing to poll
+  try {
+    await loadStats();
+    if (!state.searchQuery && document.activeElement !== searchInput) {
+      if (!searchInput.value) loadClips();
+    }
+  } catch (e) {
+    if (e.message !== "pairing_required") throw e;
   }
 }, 3000);

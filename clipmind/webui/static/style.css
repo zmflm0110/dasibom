@@ -476,6 +476,112 @@ html, body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ---------- Phone connect nav button ---------- */
+
+.phone-connect-btn {
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  text-align: left;
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* ---------- Modals ---------- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 15, 15, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+  padding: 20px;
+}
+
+.modal-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 340px;
+  overflow: hidden;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.modal-body {
+  padding: 18px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.modal-hint {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 4px 0;
+}
+
+.phone-qr {
+  width: 180px;
+  height: 180px;
+  border-radius: 8px;
+  background: #fff;
+  padding: 8px;
+  margin: 6px 0;
+}
+
+.phone-url-row {
+  background: var(--bg-code);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+.phone-url-row code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+#phone-pin {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.15em;
+  color: var(--text);
+}
+
+.pair-input {
+  width: 100%;
+  font-size: 24px;
+  letter-spacing: 0.3em;
+  text-align: center;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-code);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.pair-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+.pair-error {
+  color: var(--danger);
+  font-size: 12.5px;
+  margin-top: 6px;
+}
+
 /* ---------- Scrollbars ---------- */
 
 .nav::-webkit-scrollbar, .clip-list::-webkit-scrollbar { width: 8px; }
@@ -488,11 +594,24 @@ html, body {
 /* ---------- Small screens ---------- */
 
 @media (max-width: 640px) {
-  .sidebar { width: 76px; min-width: 76px; padding: 12px 4px; }
+  #app { flex-direction: column; }
+  .sidebar {
+    width: 100%; min-width: 0; height: auto;
+    flex-direction: row; align-items: center; flex-wrap: wrap;
+    padding: calc(10px + env(safe-area-inset-top)) 12px 8px;
+    border-right: none; border-bottom: 1px solid var(--border);
+    gap: 6px;
+  }
+  .brand { padding: 0; }
   .brand-name { display: none; }
-  .nav-item-label span.label-text { display: none; }
-  .footer-text { display: none; }
-  .topbar { padding: 12px 14px 6px; }
-  .list-head { padding: 12px 14px 6px; }
-  .clip-list { padding: 2px 10px 90px; }
+  .nav { flex-direction: row; overflow-x: auto; flex: 1; gap: 6px; }
+  .nav-item { flex: none; padding: 6px 10px; }
+  .nav-item-label span.label-text { display: inline; font-size: 12.5px; }
+  .phone-connect-btn, .sidebar-footer { display: none; }
+  .topbar { padding: 10px 14px 6px; }
+  .search-wrap { max-width: none; }
+  .list-head { padding: 10px 14px 4px; font-size: 17px; }
+  .clip-list { padding: 2px 10px calc(90px + env(safe-area-inset-bottom)); }
+  .clip-actions { opacity: 1; }
+  .select-bar { bottom: calc(16px + env(safe-area-inset-bottom)); left: 16px; right: 16px; transform: none; }
 }
