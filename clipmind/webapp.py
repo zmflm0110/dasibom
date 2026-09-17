@@ -16,7 +16,8 @@ from AppKit import NSPasteboard, NSPasteboardTypeString
 from . import store, monitor
 from .classifier import classify
 from .ocr import extract_text
-from .search import semantic_search, keyword_search
+from . import topics
+from .search import semantic_search, keyword_search, topic_aware_search
 from .combine import combine_clips
 from .context import suggest as context_suggest
 from .pairing import Pairing
@@ -75,6 +76,8 @@ def _row_to_dict(row) -> dict:
         "created_at": row["created_at"],
         "char_count": row["char_count"],
         "has_image": bool(row["image_path"]),
+        "topic": row["topic"],
+        "topic_name": topics.display_name(row["topic"]) if row["topic"] else None,
     }
 
 
@@ -135,13 +138,16 @@ def api_create_image_clip():
     ocr_text = extract_text(image_path).strip()
     content = ocr_text if ocr_text else "(텍스트 없는 이미지)"
     source = "Mac (직접 추가)" if request.remote_addr in TRUSTED_LOCAL_ADDRS else "iPhone"
+    topic, _confidence = topics.classify_topic(ocr_text)
 
     conn = store.connect()
     new_id = store.add_clip(
         conn, content, category="image", subtype=None, source_app=source,
         image_path=str(image_path.relative_to(store.IMAGES_DIR.parent)),
+        topic=topic,
     )
-    return jsonify({"ok": True, "id": new_id, "ocr_text": ocr_text})
+    return jsonify({"ok": True, "id": new_id, "ocr_text": ocr_text,
+                    "topic": topic, "topic_name": topics.display_name(topic)})
 
 
 @app.get("/api/images/<int:clip_id>")
@@ -178,7 +184,7 @@ def api_search():
     if request.args.get("keyword") == "1":
         rows = keyword_search(conn, query, limit=top_k)
         return jsonify([{**_row_to_dict(r), "score": None} for r in rows])
-    results = semantic_search(conn, query, top_k=top_k, category=category)
+    results = topic_aware_search(conn, query, top_k=top_k, category=category)
     return jsonify([{**_row_to_dict(r), "score": round(score, 3)} for r, score in results])
 
 

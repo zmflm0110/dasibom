@@ -20,11 +20,17 @@ CREATE TABLE IF NOT EXISTS clips (
     char_count INTEGER NOT NULL,
     embedding BLOB,
     image_path TEXT,
-    last_surfaced_at REAL
+    last_surfaced_at REAL,
+    topic TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_clips_hash ON clips(content_hash);
 CREATE INDEX IF NOT EXISTS idx_clips_category ON clips(category);
 CREATE INDEX IF NOT EXISTS idx_clips_created ON clips(created_at);
+
+CREATE TABLE IF NOT EXISTS meta (
+    key TEXT PRIMARY KEY,
+    value TEXT
+);
 """
 
 # Columns added after the initial release -- kept as a list so connect() can
@@ -33,6 +39,7 @@ _MIGRATIONS = [
     ("embedding", "BLOB"),
     ("image_path", "TEXT"),
     ("last_surfaced_at", "REAL"),
+    ("topic", "TEXT"),
 ]
 
 
@@ -47,6 +54,32 @@ def connect(db_path: Path = DB_PATH) -> sqlite3.Connection:
             conn.execute(f"ALTER TABLE clips ADD COLUMN {name} {sql_type}")
     conn.commit()
     return conn
+
+
+def get_meta(conn: sqlite3.Connection, key: str) -> Optional[str]:
+    row = conn.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
+    return row["value"] if row else None
+
+
+def set_meta(conn: sqlite3.Connection, key: str, value: str) -> None:
+    conn.execute("INSERT INTO meta (key, value) VALUES (?, ?) "
+                 "ON CONFLICT(key) DO UPDATE SET value = excluded.value", (key, value))
+    conn.commit()
+
+
+def ensure_embedding_model(conn: sqlite3.Connection, model: str) -> bool:
+    """Drop every cached vector when the embedding model changes.
+
+    Different models produce incomparable vectors, and two models can share a
+    dimension (both MiniLM and e5-small are 384-d), so a stale cache would mix
+    silently into cosine scores instead of failing loudly. Returns True if the
+    cache was cleared."""
+    previous = get_meta(conn, "embedding_model")
+    if previous == model:
+        return False
+    conn.execute("UPDATE clips SET embedding = NULL WHERE embedding IS NOT NULL")
+    set_meta(conn, "embedding_model", model)
+    return previous is not None
 
 
 def update_embedding(conn: sqlite3.Connection, clip_id: int, blob: bytes) -> None:
@@ -71,6 +104,7 @@ def add_clip(
     subtype: Optional[str] = None,
     source_app: Optional[str] = None,
     image_path: Optional[str] = None,
+    topic: Optional[str] = None,
 ) -> Optional[int]:
     """Insert a clip. Skips exact duplicate of the most recent clip. Returns new row id, or None if skipped."""
     h = content_hash(content)
@@ -80,9 +114,9 @@ def add_clip(
     if row is not None and row["content_hash"] == h:
         return None
     cur = conn.execute(
-        "INSERT INTO clips (content, content_hash, category, subtype, source_app, created_at, char_count, image_path) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        (content, h, category, subtype, source_app, time.time(), len(content), image_path),
+        "INSERT INTO clips (content, content_hash, category, subtype, source_app, created_at, char_count, image_path, topic) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (content, h, category, subtype, source_app, time.time(), len(content), image_path, topic),
     )
     conn.commit()
     return cur.lastrowid

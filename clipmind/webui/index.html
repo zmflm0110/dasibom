@@ -126,9 +126,12 @@
 
         <p class="modal-hint" style="text-align:left;margin:0 0 8px;">인스타에서 찍어둔 아이디어
           스크린샷을 올리면, 이미지 속 글자를 자동으로 읽어서(OCR) 나중에 검색할 수 있게 됩니다.</p>
-        <label for="quickadd-image" class="image-picker-btn">🖼 스크린샷 선택</label>
-        <input id="quickadd-image" type="file" accept="image/*" hidden>
-        <p id="quickadd-status" class="modal-hint" hidden></p>
+        <label for="quickadd-image" class="image-picker-btn">🖼 스크린샷 선택 (여러 장 가능)</label>
+        <input id="quickadd-image" type="file" accept="image/*" multiple hidden>
+        <div id="upload-progress" class="upload-progress" hidden>
+          <div class="upload-bar"><div id="upload-bar-fill" class="upload-bar-fill"></div></div>
+          <p id="quickadd-status" class="modal-hint"></p>
+        </div>
       </div>
     </div>
   </div>

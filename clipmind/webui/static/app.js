@@ -362,36 +362,53 @@ el("#quickadd-btn").addEventListener("click", () => {
 });
 el("#quickadd-close").addEventListener("click", () => { el("#quickadd-modal").hidden = true; });
 
-el("#quickadd-image").addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const status = el("#quickadd-status");
-  status.hidden = false;
-  status.textContent = "글자를 읽는 중…";
-
+async function uploadOneScreenshot(file) {
   const form = new FormData();
   form.append("image", file);
   const token = getToken();
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const res = await fetch("/api/clips/image", { method: "POST", body: form, headers });
+  if (res.status === 401) throw new Error("pairing_required");
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || "failed");
+  return data;
+}
 
-  try {
-    const res = await fetch("/api/clips/image", { method: "POST", body: form, headers });
-    if (res.status === 401) { showPairOverlay(); return; }
-    const data = await res.json();
-    if (!data.ok) {
-      status.textContent = data.error === "too_large" ? "이미지가 너무 커요 (15MB 제한)" : "추가하지 못했어요";
-      return;
+el("#quickadd-image").addEventListener("change", async (e) => {
+  const files = [...e.target.files];
+  e.target.value = "";
+  if (!files.length) return;
+
+  const progress = el("#upload-progress");
+  const fill = el("#upload-bar-fill");
+  const status = el("#quickadd-status");
+  progress.hidden = false;
+
+  // Sequential, not parallel: OCR is CPU-bound on the Mac, and firing 50 requests
+  // at once would just queue them behind each other while starving the UI poll.
+  let done = 0, ocrHits = 0, failed = 0;
+  for (const file of files) {
+    status.textContent = `글자를 읽는 중… ${done + 1} / ${files.length}`;
+    try {
+      const data = await uploadOneScreenshot(file);
+      if (data.ocr_text) ocrHits++;
+    } catch (err) {
+      if (err.message === "pairing_required") { showPairOverlay(); progress.hidden = true; return; }
+      failed++;
     }
-    el("#quickadd-modal").hidden = true;
-    status.hidden = true;
-    showToast(data.ocr_text ? "아이디어 저장됨 (글자도 읽었어요)" : "이미지 저장됨");
-    loadStats();
-    loadClips();
-  } catch {
-    status.textContent = "추가하지 못했어요";
-  } finally {
-    e.target.value = "";
+    done++;
+    fill.style.width = `${Math.round((done / files.length) * 100)}%`;
   }
+
+  progress.hidden = true;
+  fill.style.width = "0%";
+  el("#quickadd-modal").hidden = true;
+  const parts = [`${done - failed}장 저장됨`];
+  if (ocrHits) parts.push(`${ocrHits}장에서 글자 읽음`);
+  if (failed) parts.push(`${failed}장 실패`);
+  showToast(parts.join(" · "));
+  loadStats();
+  loadClips();
 });
 
 el("#quickadd-submit").addEventListener("click", async () => {
