@@ -42,6 +42,12 @@ def update_embedding(conn: sqlite3.Connection, clip_id: int, blob: bytes) -> Non
     conn.commit()
 
 
+def delete_clip(conn: sqlite3.Connection, clip_id: int) -> bool:
+    cur = conn.execute("DELETE FROM clips WHERE id = ?", (clip_id,))
+    conn.commit()
+    return cur.rowcount > 0
+
+
 def content_hash(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 

@@ -3,3 +3,5 @@ scikit-learn
 numpy
 sentence-transformers
 rumps
+flask
+pywebview

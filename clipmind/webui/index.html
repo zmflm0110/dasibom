@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ClipMind</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div id="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-icon">📋</span>
+      <span class="brand-name">ClipMind</span>
+    </div>
+
+    <nav class="nav" id="nav-list">
+      <!-- filled by app.js -->
+    </nav>
+
+    <div class="sidebar-footer" id="daemon-status">
+      <span class="dot"></span>
+      <span class="footer-text">감시 중</span>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <div class="topbar">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input id="search-input" type="text" placeholder="의미로 검색해보세요… 예) 로그인 토큰 발급 코드" autocomplete="off">
+        <button id="search-clear" class="search-clear" hidden>✕</button>
+      </div>
+      <button id="suggest-btn" class="ghost-btn" title="지금 보고 있는 앱에 맞춰 추천">✦ 추천</button>
+    </div>
+
+    <div id="suggest-banner" class="suggest-banner" hidden>
+      <div class="suggest-banner-head">
+        <span id="suggest-title">추천</span>
+        <button id="suggest-close" class="icon-btn">✕</button>
+      </div>
+      <div id="suggest-items" class="suggest-items"></div>
+    </div>
+
+    <div class="list-head">
+      <span id="list-title">전체</span>
+      <span id="list-count" class="count-pill">0</span>
+    </div>
+
+    <div id="clip-list" class="clip-list"></div>
+    <div id="empty-state" class="empty-state" hidden>
+      <div class="empty-emoji">🗒️</div>
+      <div>아직 저장된 클립이 없어요</div>
+      <div class="empty-sub">뭔가 복사하면 여기 자동으로 쌓입니다</div>
+    </div>
+
+  </main>
+
+  <div id="select-bar" class="select-bar" hidden>
+    <span id="select-count">0개 선택됨</span>
+    <div class="select-actions">
+      <button id="select-combine" class="primary-btn">합치기 &amp; 복사</button>
+      <button id="select-cancel" class="ghost-btn">취소</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>
