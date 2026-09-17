@@ -238,7 +238,8 @@ def api_resurface():
 
     if len(items) < RESURFACE_COUNT:
         forgotten = store.resurface_candidates(
-            conn, "image", RESURFACE_MIN_AGE_SECONDS, RESURFACE_COUNT - len(items))
+            conn, "image", RESURFACE_MIN_AGE_SECONDS, RESURFACE_COUNT - len(items),
+            today_iso=today.isoformat())
         for row in forgotten:
             item = _row_to_dict(row)
             item["reason"] = "한동안 안 봤어요"

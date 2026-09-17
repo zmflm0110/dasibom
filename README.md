@@ -167,6 +167,7 @@ for f in tests/test_*.py; do python3 "$f"; done
 | `test_topics.py` | 규칙 폴백 분류 |
 | `test_pairing.py` | PIN 페어링·속도 제한 |
 | `test_resurface.py` | 다시 꺼내주기 선택 로직 |
+| `test_resurface_longterm.py` | 3주간 반복 노출·사각지대 시뮬레이션 |
 | `test_monitor_sensitive.py` | 비밀번호 표시된 값 저장 안 함 |
 | `test_store_search.py` | 저장·검색·조합 |
 | `test_classifier.py` | 텍스트 종류 판별 |

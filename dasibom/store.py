@@ -193,14 +193,24 @@ def upcoming_clips(conn: sqlite3.Connection, today_iso: str, horizon_iso: str, l
     ).fetchall()
 
 
-def resurface_candidates(conn: sqlite3.Connection, category: str, min_age_seconds: float, limit: int):
-    """Fallback tier: old clips with no date attached. Oldest-surfaced first so
-    the same couple of images don't get repeated."""
+def resurface_candidates(conn: sqlite3.Connection, category: str, min_age_seconds: float,
+                         limit: int, today_iso: Optional[str] = None):
+    """Fallback tier: old clips that aren't an upcoming event right now.
+
+    Includes clips whose date has already passed. They used to fall through a
+    gap -- the upcoming tier wanted event_date >= today, this one wanted
+    event_date IS NULL -- so a screenshot with a date became permanently
+    invisible to the nudge the day after its event. Over months that dead zone
+    only grows, and it's exactly the "찍어두고 잊은" case the feature exists for.
+
+    Oldest-surfaced first, so the same few images don't keep coming back."""
     cutoff = time.time() - min_age_seconds
+    today_iso = today_iso or time.strftime("%Y-%m-%d")
     return conn.execute(
-        "SELECT * FROM clips WHERE category = ? AND created_at < ? AND event_date IS NULL "
+        "SELECT * FROM clips WHERE category = ? AND created_at < ? "
+        "AND (event_date IS NULL OR event_date < ?) "
         "ORDER BY last_surfaced_at IS NOT NULL, last_surfaced_at ASC, RANDOM() LIMIT ?",
-        (category, cutoff, limit),
+        (category, cutoff, today_iso, limit),
     ).fetchall()
 
 
