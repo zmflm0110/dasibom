@@ -85,7 +85,7 @@ class ClipMindApp(rumps.App):
     def on_suggest(self, _):
         from .context import suggest as context_suggest
 
-        app_name, category, results = context_suggest(self.conn, top_k=5)
+        app_name, category, results, _language = context_suggest(self.conn, top_k=5)
         header = f"현재 앱: {app_name or '?'}" + (f" (맥락={category})" if category else "")
         if not results:
             rumps.alert(title=header, message="(제안 없음)")

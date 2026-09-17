@@ -65,10 +65,11 @@ def api_suggest():
     conn = store.connect()
     query = request.args.get("q") or None
     top_k = int(request.args.get("top_k", 8))
-    app_name, category, results = context_suggest(conn, query=query, top_k=top_k)
+    app_name, category, results, language = context_suggest(conn, query=query, top_k=top_k)
     return jsonify({
         "app_name": app_name,
         "category": category,
+        "language": language,
         "results": [{**_row_to_dict(r), "score": round(score, 3)} for r, score in results],
     })
 

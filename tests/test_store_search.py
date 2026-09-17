@@ -70,13 +70,22 @@ assert results2 and results2[0][0]["id"] == ids[6], "top result should be the lu
 print("PASS  semantic search correctly ranks Korean natural-language query")
 
 if _emb.is_available():
+    from clipmind import reranker as _rerank
+
     print("\n--- semantic_search('로그인 인증 토큰 발급하는 코드') [no literal token overlap test] ---")
     results3 = semantic_search(conn, "로그인 인증 토큰 발급하는 코드", top_k=3, category="code")
     for row, score in results3:
         print(f"  #{row['id']} score={score:.3f} {row['content'][:50]!r}")
     top_ids3 = [r["id"] for r, _ in results3]
     assert ids[10] in top_ids3, "cross-lingual concept search should surface the JWT token-issuing function"
-    print("PASS  cross-lingual CONCEPT search (no shared literal tokens) surfaces JWT auth code")
+    if _rerank.is_available():
+        assert top_ids3[0] == ids[10], (
+            "with the cross-encoder reranker enabled, the JWT snippet should rank #1, "
+            "not just appear somewhere in the top-3 (this is what the rerank stage is for)"
+        )
+        print("PASS  reranker puts the JWT auth code in the #1 spot (not just top-3)")
+    else:
+        print("PASS  cross-lingual CONCEPT search (no shared literal tokens) surfaces JWT auth code in top-3")
 
 print("\n--- keyword_search('FastAPI') ---")
 kw = keyword_search(conn, "FastAPI")

@@ -1,12 +1,19 @@
 """Local search over stored clips.
 
-Two backends:
+Retrieval:
   - embeddings.py: real multilingual sentence-embedding cosine search (semantic,
     cross-language). Used automatically when sentence-transformers is installed.
   - TF-IDF (scikit-learn): pure lexical fallback, works with zero extra
     dependencies/downloads but only matches on shared vocabulary.
 
-No external API calls either way -- everything runs locally.
+Reranking (optional second stage):
+  - reranker.py: a cross-encoder rescoring the embedding search's top candidates
+    directly against the query. Bi-encoder cosine similarity alone is noisy on
+    small corpora of short texts; a cross-encoder fixes ordering because it
+    attends to the query and candidate jointly instead of comparing two
+    independently-computed vectors.
+
+No external API calls anywhere in this pipeline -- everything runs locally.
 """
 from typing import Optional
 
@@ -14,7 +21,10 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from . import store, embeddings
+from . import store, embeddings, reranker
+
+RERANK_CANDIDATE_MULTIPLIER = 4
+RERANK_CANDIDATE_MAX = 30
 
 
 def _filtered_rows(conn, category: Optional[str]):
@@ -76,10 +86,16 @@ def _embedding_search(conn, query: str, top_k: int, category: Optional[str]):
     return [(r, float(s)) for r, s in ranked[:top_k] if s > 0]
 
 
-def semantic_search(conn, query: str, top_k: int = 5, category: Optional[str] = None):
-    if embeddings.is_available():
-        return _embedding_search(conn, query, top_k, category)
-    return _tfidf_search(conn, query, top_k, category)
+def semantic_search(conn, query: str, top_k: int = 5, category: Optional[str] = None, rerank: bool = True):
+    if not embeddings.is_available():
+        return _tfidf_search(conn, query, top_k, category)
+
+    candidate_k = min(max(top_k * RERANK_CANDIDATE_MULTIPLIER, top_k), RERANK_CANDIDATE_MAX)
+    candidates = _embedding_search(conn, query, candidate_k, category)
+
+    if rerank and candidates and reranker.is_available():
+        return reranker.rerank(query, candidates)[:top_k]
+    return candidates[:top_k]
 
 
 def keyword_search(conn, query: str, limit: int = 20):

@@ -63,10 +63,12 @@ def cmd_combine(args):
 
 def cmd_suggest(args):
     conn = store.connect()
-    app_name, category, results = context_suggest(conn, query=args.query, top_k=args.top_k)
+    app_name, category, results, language = context_suggest(conn, query=args.query, top_k=args.top_k)
     ctx = f"app={app_name or '?'}"
     if category:
         ctx += f" -> inferred category={category}"
+    if language:
+        ctx += f" (language={language})"
     print(f"[context] {ctx}")
     if not results:
         print("(no suggestions)")
