@@ -316,6 +316,7 @@ async function loadClips() {
   params.set("limit", "200");
   state.clips = await api(`/api/clips?${params}`);
   el("#list-title").textContent = state.activeLabel ?? "전체";
+  el("#search-hint").hidden = true;
   renderClips();
 }
 
@@ -327,8 +328,13 @@ async function runSearch(query) {
   const params = new URLSearchParams({ q: query, top_k: "50" });
   if (state.activeCategory) params.set("category", state.activeCategory);
   state.clips = await api(`/api/search?${params}`);
-  el("#list-title").textContent = `“${query}” 검색 결과`;
+  // Deliberately "가까운 순서", not "검색 결과": measured three ways (absolute
+  // score, top-vs-rest gap, LLM yes/no judge) and none could tell "I have this"
+  // from "I don't". Rather than claim a match we can't verify, the list is
+  // presented as nearest-first and the hint below says so.
+  el("#list-title").textContent = `“${query}” 와 가까운 순서`;
   renderClips();
+  el("#search-hint").hidden = state.clips.length === 0;
 }
 
 // ---------- Search input ----------
@@ -343,6 +349,7 @@ searchInput.addEventListener("input", () => {
 el("#search-clear").addEventListener("click", () => {
   searchInput.value = "";
   el("#search-clear").hidden = true;
+  el("#search-hint").hidden = true;
   loadClips();
   searchInput.focus();
 });
