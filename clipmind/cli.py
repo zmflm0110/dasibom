@@ -5,6 +5,7 @@ import sys
 from . import store
 from .search import semantic_search, keyword_search
 from .combine import combine_clips
+from .context import suggest as context_suggest
 
 
 def _preview(text: str, n: int = 70) -> str:
@@ -60,6 +61,21 @@ def cmd_combine(args):
     print(text)
 
 
+def cmd_suggest(args):
+    conn = store.connect()
+    app_name, category, results = context_suggest(conn, query=args.query, top_k=args.top_k)
+    ctx = f"app={app_name or '?'}"
+    if category:
+        ctx += f" -> inferred category={category}"
+    print(f"[context] {ctx}")
+    if not results:
+        print("(no suggestions)")
+        return
+    for row, score in results:
+        tag = row["category"] + (f"/{row['subtype']}" if row["subtype"] else "")
+        print(f"#{row['id']:<5} score={score:.3f} [{tag:<18}] {_preview(row['content'])}")
+
+
 def cmd_stats(args):
     conn = store.connect()
     s = store.stats(conn)
@@ -95,6 +111,11 @@ def main():
     p = sub.add_parser("combine", help="combine multiple clips by id")
     p.add_argument("ids", type=int, nargs="+")
     p.set_defaults(func=cmd_combine)
+
+    p = sub.add_parser("suggest", help="context-aware suggestions based on the frontmost app")
+    p.add_argument("query", nargs="?", default=None)
+    p.add_argument("--top-k", type=int, default=5)
+    p.set_defaults(func=cmd_suggest)
 
     p = sub.add_parser("stats", help="show clip counts by category")
     p.set_defaults(func=cmd_stats)

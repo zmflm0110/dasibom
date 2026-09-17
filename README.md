@@ -49,6 +49,10 @@ python3 -m clipmind.cli combine 2 5 7
 
 # 카테고리별 통계
 python3 -m clipmind.cli stats
+
+# 지금 어떤 앱을 보고 있는지에 따라 맥락 맞춤 추천 (코드 에디터면 code 카테고리로 좁혀 검색)
+python3 -m clipmind.cli suggest
+python3 -m clipmind.cli suggest "JWT 인증 관련 코드"
 ```
 
 ## 테스트
@@ -79,6 +83,7 @@ python3 tests/test_store_search.py
 - **상시 실행(로그인 시 자동 시작)은 아직 없음.** `clipmind start`를 수동 실행해야 함.
   다음 단계로 launchd plist를 붙이면 로그인 시 자동 시작 가능 (시스템 자동시작 항목을
   건드리는 작업이라 별도 확인 후 진행 예정).
-- **"현재 작업 맥락 보고 추천"(예: VS Code에서 짜는 코드 보고 관련 클립 추천)은 미구현.**
-  활성 앱 이름은 기록하지만, 파일 내용이나 커서 위치를 읽어 맥락을 만드는 기능은 다음 단계.
+- **"현재 작업 맥락 보고 추천"은 기초 수준까지만 구현됨** (`clipmind suggest`).
+  현재 최전면 앱 이름만으로 code/기타 맥락을 추정해 검색 범위를 좁힘 — 실제 VS Code 파일
+  내용이나 커서 위치를 읽는 건 접근성 권한이 필요한 다음 단계이고 아직 없음.
 - **메뉴바 UI 없음.** 현재는 CLI만 있음. `rumps`로 메뉴바 앱을 얹는 게 다음 자연스러운 단계.
