@@ -51,6 +51,32 @@ def _frontmost_app_name() -> str | None:
         return None
 
 
+def poll_tick(pb, conn, last_change_count: int, verbose: bool = True) -> int:
+    """Check the pasteboard once; store a new clip if it changed. Returns the change count to compare next time.
+
+    Shared by the CLI daemon (run, below) and the menu-bar app (menubar.py) so
+    both use exactly the same capture/classify/skip-sensitive logic.
+    """
+    cc = pb.changeCount()
+    if cc == last_change_count:
+        return cc
+    if _is_sensitive(pb):
+        if verbose:
+            print("[clipmind] skipped (marked sensitive by source app)", flush=True)
+        return cc
+    text = _read_pasteboard_string(pb)
+    if text:
+        text = text[:MAX_CONTENT_CHARS]
+        category, subtype = classify(text)
+        app_name = _frontmost_app_name()
+        new_id = store.add_clip(conn, text, category, subtype, app_name)
+        if verbose and new_id:
+            preview = text.replace("\n", " ")[:60]
+            print(f"[clipmind] #{new_id} [{category}{'/' + subtype if subtype else ''}] "
+                  f"({app_name}) {preview!r}", flush=True)
+    return cc
+
+
 def run(poll_interval: float = POLL_INTERVAL, max_iterations: int | None = None, verbose: bool = True):
     conn = store.connect()
     pb = NSPasteboard.generalPasteboard()
@@ -62,23 +88,7 @@ def run(poll_interval: float = POLL_INTERVAL, max_iterations: int | None = None,
     iterations = 0
     try:
         while True:
-            cc = pb.changeCount()
-            if cc != last_change_count:
-                last_change_count = cc
-                if _is_sensitive(pb):
-                    if verbose:
-                        print("[clipmind] skipped (marked sensitive by source app)", flush=True)
-                else:
-                    text = _read_pasteboard_string(pb)
-                    if text:
-                        text = text[:MAX_CONTENT_CHARS]
-                        category, subtype = classify(text)
-                        app_name = _frontmost_app_name()
-                        new_id = store.add_clip(conn, text, category, subtype, app_name)
-                        if verbose and new_id:
-                            preview = text.replace("\n", " ")[:60]
-                            print(f"[clipmind] #{new_id} [{category}{'/' + subtype if subtype else ''}] "
-                                  f"({app_name}) {preview!r}", flush=True)
+            last_change_count = poll_tick(pb, conn, last_change_count, verbose=verbose)
             time.sleep(poll_interval)
             iterations += 1
             if max_iterations is not None and iterations >= max_iterations:

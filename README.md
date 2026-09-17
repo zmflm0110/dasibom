@@ -55,6 +55,16 @@ python3 -m clipmind.cli suggest
 python3 -m clipmind.cli suggest "JWT 인증 관련 코드"
 ```
 
+### 메뉴바 앱
+
+```bash
+python3 -m clipmind.menubar
+```
+
+메뉴바에 📋 아이콘으로 뜨고, 백그라운드에서 0.5초 간격으로 클립보드를 감시한다.
+"Recent" 하위 메뉴에서 최근 클립을 클릭하면 다시 클립보드로 복사되고, "Search…"로
+의미 검색, "Suggest for current app"으로 맥락 추천을 바로 확인할 수 있다.
+
 ## 테스트
 
 ```bash
@@ -86,4 +96,7 @@ python3 tests/test_store_search.py
 - **"현재 작업 맥락 보고 추천"은 기초 수준까지만 구현됨** (`clipmind suggest`).
   현재 최전면 앱 이름만으로 code/기타 맥락을 추정해 검색 범위를 좁힘 — 실제 VS Code 파일
   내용이나 커서 위치를 읽는 건 접근성 권한이 필요한 다음 단계이고 아직 없음.
-- **메뉴바 UI 없음.** 현재는 CLI만 있음. `rumps`로 메뉴바 앱을 얹는 게 다음 자연스러운 단계.
+- **메뉴바 앱 있음** (`clipmind.menubar`, rumps 기반) — 실제로 띄워서 스크린샷으로 아이콘
+  노출 확인, GUI 세션에서 실제 활성 앱 이름("터미널")까지 정확히 기록되는 것까지 라이브로
+  검증함. 단, 메뉴 클릭 자체는 이 환경에 macOS 전역 UI 자동화 도구가 없어 직접 클릭 테스트는
+  못 했음 — 백그라운드 캡처/저장 경로만 확인됨.
