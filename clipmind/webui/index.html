@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>ClipMind</title>
+<title>다시봄</title>
 <link rel="manifest" href="/static/manifest.json">
 <meta name="theme-color" content="#2383e2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ClipMind">
+<meta name="apple-mobile-web-app-title" content="다시봄">
 <link rel="apple-touch-icon" href="/static/icons/icon-180.png">
 <link rel="icon" href="/static/icons/icon-192.png">
 <link rel="stylesheet" href="/static/style.css">
@@ -18,8 +18,8 @@
 
   <aside class="sidebar">
     <div class="brand">
-      <span class="brand-icon">📋</span>
-      <span class="brand-name">ClipMind</span>
+      <span class="brand-icon">🔎</span>
+      <span class="brand-name">다시봄</span>
     </div>
 
     <nav class="nav" id="nav-list">
@@ -35,7 +35,7 @@
 
     <div class="sidebar-footer" id="daemon-status">
       <span class="dot"></span>
-      <span class="footer-text">감시 중</span>
+      <span class="footer-text">전부 이 컴퓨터 안에서 처리됩니다</span>
     </div>
   </aside>
 
@@ -44,7 +44,7 @@
     <div class="topbar">
       <div class="search-wrap">
         <span class="search-icon">⌕</span>
-        <input id="search-input" type="text" placeholder="의미로 검색해보세요… 예) 로그인 토큰 발급 코드" autocomplete="off">
+        <input id="search-input" type="text" placeholder="뭐였더라… 예) 저번에 저장해둔 카페" autocomplete="off">
         <button id="search-clear" class="search-clear" hidden>✕</button>
       </div>
       <button id="suggest-btn" class="ghost-btn" title="지금 보고 있는 앱에 맞춰 추천">✦ 추천</button>
@@ -74,9 +74,9 @@
 
     <div id="clip-list" class="clip-list"></div>
     <div id="empty-state" class="empty-state" hidden>
-      <div class="empty-emoji">🗒️</div>
-      <div>아직 저장된 클립이 없어요</div>
-      <div class="empty-sub">뭔가 복사하면 여기 자동으로 쌓입니다</div>
+      <div class="empty-emoji">🖼️</div>
+      <div>아직 모아둔 스크린샷이 없어요</div>
+      <div class="empty-sub">"+ 추가"로 스크린샷을 올리면, 글자를 읽어서 나중에 찾을 수 있게 만들어둡니다</div>
     </div>
 
   </main>
@@ -112,35 +112,32 @@
   <div id="quickadd-modal" class="modal-overlay" hidden>
     <div class="modal-card">
       <div class="modal-head">
-        <span>+ 클립 추가</span>
+        <span>+ 스크린샷 추가</span>
         <button id="quickadd-close" class="icon-btn">✕</button>
       </div>
       <div class="modal-body" style="align-items:stretch;">
-        <p class="modal-hint" style="text-align:left;">iOS는 앱(네이티브 포함)이 클립보드를
-          몰래 감시하는 걸 막아둬서, 자동으로는 안 올라와요. 아래에 붙여넣고 보내면 바로
-          추가됩니다.</p>
-        <textarea id="quickadd-text" class="quickadd-textarea" placeholder="여기에 길게 눌러 붙여넣기…" rows="5"></textarea>
-        <button id="quickadd-submit" class="primary-btn" style="width:100%;margin-top:10px;">텍스트 보내기</button>
-
-        <div class="quickadd-divider"><span>또는</span></div>
-
-        <p class="modal-hint" style="text-align:left;margin:0 0 8px;">인스타에서 찍어둔 아이디어
-          스크린샷을 올리면, 이미지 속 글자를 자동으로 읽어서(OCR) 나중에 검색할 수 있게 됩니다.</p>
+        <p class="modal-hint" style="text-align:left;margin:0 0 10px;">찍어두고 잊어버린
+          스크린샷을 올려주세요. 이미지 속 글자를 읽고(OCR), 무엇에 대한 것인지 파악해서
+          나중에 "저번에 그거" 라고 찾을 수 있게 만들어둡니다. 전부 이 컴퓨터 안에서 처리됩니다.</p>
         <label for="quickadd-image" class="image-picker-btn">🖼 스크린샷 선택 (여러 장 가능)</label>
         <input id="quickadd-image" type="file" accept="image/*" multiple hidden>
         <div id="upload-progress" class="upload-progress" hidden>
           <div class="upload-bar"><div id="upload-bar-fill" class="upload-bar-fill"></div></div>
           <p id="quickadd-status" class="modal-hint"></p>
         </div>
+
+        <div class="quickadd-divider"><span>또는 직접 입력</span></div>
+        <textarea id="quickadd-text" class="quickadd-textarea" placeholder="붙여넣거나 메모를 적어보세요…" rows="3"></textarea>
+        <button id="quickadd-submit" class="primary-btn" style="width:100%;margin-top:10px;">텍스트로 추가</button>
       </div>
     </div>
   </div>
 
   <div id="pair-overlay" class="modal-overlay" hidden>
     <div class="modal-card">
-      <div class="modal-head"><span>🔐 ClipMind에 연결</span></div>
+      <div class="modal-head"><span>🔐 다시봄에 연결</span></div>
       <div class="modal-body">
-        <p class="modal-hint">컴퓨터의 ClipMind 앱에서 "📱 폰에서 열기"를 눌러 표시되는
+        <p class="modal-hint">컴퓨터의 다시봄 앱에서 "📱 폰에서 열기"를 눌러 표시되는
           6자리 PIN을 입력하세요.</p>
         <input id="pair-pin-input" class="pair-input" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="off">
         <button id="pair-submit" class="primary-btn" style="width:100%;margin-top:10px;">연결</button>
