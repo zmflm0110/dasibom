@@ -594,6 +594,36 @@ html, body {
 }
 .image-picker-btn:hover { background: var(--bg-hover); color: var(--text); border-color: var(--accent); }
 
+.clip-summary {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 6px;
+  font-weight: 450;
+}
+.clip-summary.pending { color: var(--text-faint); font-style: italic; font-weight: 400; }
+
+/* Once the AI has summarized it, the raw OCR is reference material -- hidden
+   until the row is expanded. Showing summary + thumbnail + OCR at once was
+   three copies of the same thing. */
+.clip-row .clip-summary ~ .clip-preview { display: none; }
+.clip-row.expanded .clip-summary ~ .clip-preview {
+  display: block;
+  max-height: none;
+  font-size: 12.5px;
+  color: var(--text-faint);
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: 6px;
+}
+
+.nav-pending {
+  padding: 6px 8px;
+  font-size: 12px;
+  color: var(--text-faint);
+  font-style: italic;
+}
+
 .upload-progress { width: 100%; margin-top: 12px; }
 .upload-bar {
   width: 100%;

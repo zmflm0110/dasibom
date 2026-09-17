@@ -7,6 +7,7 @@ but never calls out anywhere itself. The desktop app (pywebview, always on
 """
 import hashlib
 import io
+import json
 import socket
 from pathlib import Path
 
@@ -78,6 +79,10 @@ def _row_to_dict(row) -> dict:
         "has_image": bool(row["image_path"]),
         "topic": row["topic"],
         "topic_name": topics.display_name(row["topic"]) if row["topic"] else None,
+        "label": row["label"],
+        "summary": row["summary"],
+        "tags": json.loads(row["tags"]) if row["tags"] else [],
+        "understood": row["understood_at"] is not None,
     }
 
 
@@ -90,8 +95,13 @@ def index():
 def api_clips():
     conn = store.connect()
     category = request.args.get("category") or None
+    label = request.args.get("label") or None
     limit = int(request.args.get("limit", 100))
-    rows = store.list_clips(conn, limit=limit, category=category)
+    if label:
+        rows = conn.execute("SELECT * FROM clips WHERE label = ? ORDER BY id DESC LIMIT ?",
+                            (label, limit)).fetchall()
+    else:
+        rows = store.list_clips(conn, limit=limit, category=category)
     return jsonify([_row_to_dict(r) for r in rows])
 
 
@@ -200,6 +210,22 @@ def api_suggest():
         "language": language,
         "results": [{**_row_to_dict(r), "score": round(score, 3)} for r, score in results],
     })
+
+
+@app.get("/api/labels")
+def api_labels():
+    """The taxonomy the local LLM invented for this library -- nothing here was
+    predefined, so the sidebar is built from what the user actually saved."""
+    conn = store.connect()
+    rows = conn.execute(
+        "SELECT label, COUNT(*) c FROM clips WHERE label IS NOT NULL AND label != '' "
+        "GROUP BY label ORDER BY c DESC"
+    ).fetchall()
+    pending = conn.execute(
+        "SELECT COUNT(*) c FROM clips WHERE understood_at IS NULL"
+    ).fetchone()["c"]
+    return jsonify({"labels": [{"label": r["label"], "count": r["c"]} for r in rows],
+                    "pending": pending})
 
 
 @app.get("/api/stats")

@@ -6,3 +6,4 @@ rumps
 flask
 pywebview
 qrcode
+mlx-lm

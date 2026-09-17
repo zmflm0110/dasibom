@@ -19,6 +19,9 @@ const ALL_CATEGORIES = Object.keys(CATEGORY_META);
 
 const state = {
   activeCategory: null,   // null = 전체
+  activeLabel: null,      // AI가 지은 분류로 필터링
+  labels: [],
+  pendingUnderstanding: 0,
   clips: [],
   stats: { total: 0, by_category: {} },
   selected: new Set(),
@@ -135,27 +138,37 @@ function showToast(msg) {
 
 // ---------- Sidebar ----------
 
+// The sidebar is built from labels the local LLM invented, not a list anyone
+// hardcoded -- so it reflects what this particular person actually saves.
+const LABEL_DOT_COLORS = ["blue", "green", "orange", "purple", "red", "yellow", "pink", "brown", "gray"];
+function labelColor(label) {
+  let hash = 0;
+  for (const ch of label) hash = (hash * 31 + ch.codePointAt(0)) >>> 0;
+  return LABEL_DOT_COLORS[hash % LABEL_DOT_COLORS.length];
+}
+
 function renderNav() {
-  const items = [{ key: null, label: "전체", color: null, count: state.stats.total }];
-  for (const cat of ALL_CATEGORIES) {
-    const count = state.stats.by_category[cat];
-    if (!count) continue;
-    items.push({ key: cat, label: CATEGORY_META[cat].label, color: CATEGORY_META[cat].color, count });
+  const items = [{ key: null, text: "전체", color: null, count: state.stats.total }];
+  for (const { label, count } of state.labels) {
+    items.push({ key: label, text: label, color: labelColor(label), count });
   }
 
+  const pending = state.pendingUnderstanding > 0
+    ? `<div class="nav-pending">${state.pendingUnderstanding}장 읽는 중…</div>` : "";
+
   navEl.innerHTML = items.map((item) => `
-    <div class="nav-item ${item.key === state.activeCategory ? "active" : ""}" data-cat="${item.key ?? ""}">
+    <div class="nav-item ${item.key === state.activeLabel ? "active" : ""}" data-label="${item.key ?? ""}">
       <span class="nav-item-label">
         ${item.color ? `<span class="tag-dot tag-${item.color}"></span>` : `<span class="tag-dot" style="background:var(--text-faint)"></span>`}
-        <span class="label-text">${item.label}</span>
+        <span class="label-text">${item.text}</span>
       </span>
       <span class="nav-count">${item.count}</span>
     </div>
-  `).join("");
+  `).join("") + pending;
 
   navEl.querySelectorAll(".nav-item").forEach((node) => {
     node.addEventListener("click", () => {
-      state.activeCategory = node.dataset.cat || null;
+      state.activeLabel = node.dataset.label || null;
       state.selected.clear();
       el("#search-input").value = "";
       state.searchQuery = "";
@@ -174,16 +187,25 @@ function clipRowHTML(clip, score) {
   const selected = state.selected.has(clip.id);
   const expanded = state.expanded.has(clip.id);
   const thumb = clip.has_image ? `<img class="clip-thumb" src="/api/images/${clip.id}" alt="">` : "";
+  // Show what the AI understood; the raw OCR text is the fallback, since a wall
+  // of OCR is exactly what made these screenshots unscannable in the first place.
+  const headline = clip.summary
+    ? `<div class="clip-summary">${escapeHTML(clip.summary)}</div>`
+    : (clip.understood ? "" : `<div class="clip-summary pending">읽는 중…</div>`);
+  const labelPill = clip.label
+    ? `<span class="tag-pill tag-${labelColor(clip.label)}">${escapeHTML(clip.label)}</span>`
+    : "";
   return `
     <div class="clip-row ${selected ? "selected" : ""} ${expanded ? "expanded" : ""}" data-id="${clip.id}">
       <div class="clip-check" data-role="check">${selected ? "✓" : ""}</div>
       <div class="clip-body" data-role="body">
         <div class="clip-meta-row">
-          ${tagPillHTML(clip.category, clip.subtype)}
+          ${labelPill || tagPillHTML(clip.category, clip.subtype)}
           <span class="clip-source">${clip.source_app ? escapeHTML(clip.source_app) : "알 수 없음"}</span>
           ${score !== undefined && score !== null ? `<span class="clip-score">${score}</span>` : ""}
           <span class="clip-time">${relTime(clip.created_at)}</span>
         </div>
+        ${headline}
         ${thumb}
         <div class="clip-preview ${isCode ? "code" : ""}">${preview}</div>
       </div>
@@ -281,18 +303,19 @@ el("#select-combine").addEventListener("click", async () => {
 // ---------- Data loading ----------
 
 async function loadStats() {
-  state.stats = await api("/api/stats");
+  const [stats, labelData] = await Promise.all([api("/api/stats"), api("/api/labels")]);
+  state.stats = stats;
+  state.labels = labelData.labels || [];
+  state.pendingUnderstanding = labelData.pending || 0;
   renderNav();
 }
 
 async function loadClips() {
   const params = new URLSearchParams();
-  if (state.activeCategory) params.set("category", state.activeCategory);
+  if (state.activeLabel) params.set("label", state.activeLabel);
   params.set("limit", "200");
   state.clips = await api(`/api/clips?${params}`);
-  el("#list-title").textContent = state.activeCategory
-    ? (CATEGORY_META[state.activeCategory]?.label ?? state.activeCategory)
-    : "전체";
+  el("#list-title").textContent = state.activeLabel ?? "전체";
   renderClips();
 }
 

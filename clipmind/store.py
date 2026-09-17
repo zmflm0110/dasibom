@@ -1,4 +1,5 @@
 """SQLite storage layer for clipboard items."""
+import json
 import sqlite3
 import hashlib
 import time
@@ -21,7 +22,11 @@ CREATE TABLE IF NOT EXISTS clips (
     embedding BLOB,
     image_path TEXT,
     last_surfaced_at REAL,
-    topic TEXT
+    topic TEXT,
+    label TEXT,
+    summary TEXT,
+    tags TEXT,
+    understood_at REAL
 );
 CREATE INDEX IF NOT EXISTS idx_clips_hash ON clips(content_hash);
 CREATE INDEX IF NOT EXISTS idx_clips_category ON clips(category);
@@ -40,6 +45,10 @@ _MIGRATIONS = [
     ("image_path", "TEXT"),
     ("last_surfaced_at", "REAL"),
     ("topic", "TEXT"),
+    ("label", "TEXT"),
+    ("summary", "TEXT"),
+    ("tags", "TEXT"),
+    ("understood_at", "REAL"),
 ]
 
 
@@ -174,3 +183,36 @@ def stats(conn: sqlite3.Connection) -> dict:
         "SELECT category, COUNT(*) c FROM clips GROUP BY category ORDER BY c DESC"
     ).fetchall()
     return {"total": total, "by_category": {r["category"]: r["c"] for r in by_cat}}
+
+
+def pending_understanding(conn: sqlite3.Connection, limit: int = 20):
+    """Clips the local LLM hasn't read yet. Screenshots first -- they're the ones
+    whose OCR text is meaningless to a human scanning a list."""
+    return conn.execute(
+        "SELECT * FROM clips WHERE understood_at IS NULL AND content != '(텍스트 없는 이미지)' "
+        "ORDER BY (category = 'image') DESC, id DESC LIMIT ?",
+        (limit,),
+    ).fetchall()
+
+
+def save_understanding(conn: sqlite3.Connection, clip_id: int, label: str,
+                       summary: str, tags: list[str]) -> None:
+    conn.execute(
+        "UPDATE clips SET label = ?, summary = ?, tags = ?, understood_at = ? WHERE id = ?",
+        (label, summary, json.dumps(tags, ensure_ascii=False), time.time(), clip_id),
+    )
+    conn.commit()
+
+
+def mark_understanding_failed(conn: sqlite3.Connection, clip_id: int) -> None:
+    """Stamp it so a clip the model can't parse doesn't jam the queue forever."""
+    conn.execute("UPDATE clips SET understood_at = ? WHERE id = ?", (time.time(), clip_id))
+    conn.commit()
+
+
+def distinct_labels(conn: sqlite3.Connection) -> list[str]:
+    rows = conn.execute(
+        "SELECT label, COUNT(*) c FROM clips WHERE label IS NOT NULL AND label != '' "
+        "GROUP BY label ORDER BY c DESC"
+    ).fetchall()
+    return [r["label"] for r in rows]
