@@ -40,6 +40,22 @@ check("correct pin is locked out after too many failed attempts from same IP",
 check("a different IP is not rate-limited by someone else's failures",
       p2.try_pair(p2.pin, "8.8.8.8") is not None)
 
+# --- 영속화: 앱을 재시작해도 폰이 연결된 상태로 남아야 한다 ---
+# (이전엔 토큰이 메모리에만 있어서 재시작마다 QR을 다시 찍어야 했다)
+storage: list[str] = []
+p3 = Pairing(load=lambda: list(storage), save=lambda h: storage.__setitem__(slice(None), h))
+token3 = p3.try_pair(p3.pin, "10.0.0.1")
+check("페어링 시 저장소에 기록됨", len(storage) == 1)
+check("저장된 값이 원문 토큰이 아님(해시)", token3 not in storage)
+
+restarted = Pairing(load=lambda: list(storage), save=lambda h: storage.__setitem__(slice(None), h))
+check("재시작 후에도 기존 토큰이 유효", restarted.is_valid_token(token3))
+check("재시작 시 PIN 은 새로 발급 (기기 추가는 여전히 재스캔 필요)",
+      len(restarted.pin) == 6 and restarted.pin.isdigit())
+check("재시작본에서 해제하면 저장소도 비워짐",
+      (restarted.revoke_all(), len(storage) == 0)[1])
+check("해제 후에는 토큰 무효", not restarted.is_valid_token(token3))
+
 total, passed = len(results), sum(results)
 print(f"\n{passed}/{total} passed")
 if passed != total:

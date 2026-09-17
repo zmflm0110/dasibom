@@ -34,7 +34,27 @@ RESURFACE_COUNT = 3
 UPCOMING_HORIZON_DAYS = 7  # how far ahead an event still counts as "다가오는"
 
 app = Flask(__name__, static_folder=str(WEBUI_DIR / "static"), static_url_path="/static")
-pairing = Pairing()
+
+
+def _load_token_hashes() -> list[str]:
+    raw = store.get_meta(store.connect(), "paired_token_hashes")
+    try:
+        return json.loads(raw) if raw else []
+    except json.JSONDecodeError:
+        return []
+
+
+def _save_token_hashes(hashes: list[str]) -> None:
+    store.set_meta(store.connect(), "paired_token_hashes", json.dumps(hashes))
+
+
+# Persisted so a paired phone stays paired across app restarts. The PIN itself
+# still rotates every launch, so a new device always needs a fresh scan.
+pairing = Pairing(load=_load_token_hashes, save=_save_token_hashes)
+
+
+def _hostname_url() -> str:
+    return f"http://{socket.gethostname().split('.')[0]}.local:{PORT}"
 
 
 def _image_format(raw: bytes) -> Optional[str]:
@@ -320,6 +340,16 @@ def api_pair():
     return jsonify({"ok": True, "token": token})
 
 
+@app.post("/api/pair/revoke")
+def api_pair_revoke():
+    """Log every paired phone out. Localhost only -- a phone shouldn't be able
+    to revoke the Mac's own trust, or another phone's."""
+    if request.remote_addr not in TRUSTED_LOCAL_ADDRS:
+        return jsonify({"error": "forbidden"}), 403
+    pairing.revoke_all()
+    return jsonify({"ok": True})
+
+
 @app.get("/api/pair-info")
 def api_pair_info():
     """Only the desktop app (localhost) may see the current PIN/URL to show a QR code."""
@@ -330,7 +360,8 @@ def api_pair_info():
         "pin": pairing.pin,
         "port": PORT,
         "lan_url": f"http://{ip}:{PORT}",
-        "hostname_url": f"http://{socket.gethostname().split('.')[0]}.local:{PORT}",
+        "hostname_url": _hostname_url(),
+        "paired_devices": len(pairing._token_hashes),
     })
 
 
@@ -340,7 +371,12 @@ def api_qr():
         return Response(status=403)
     import qrcode
 
-    url = f"http://{lan_ip()}:{PORT}/?pin={pairing.pin}"
+    # Hostname, not IP: the Mac's LAN address changes with the network, and the
+    # phone's saved token lives in browser storage keyed to the origin -- so an
+    # IP-based pairing silently dies the next time you join a different WiFi.
+    # A Bonjour name survives that, and iOS resolves .local natively. The IP URL
+    # stays visible in the modal for networks that block mDNS.
+    url = f"{_hostname_url()}/?pin={pairing.pin}"
     img = qrcode.make(url, border=2)
     buf = io.BytesIO()
     img.save(buf, format="PNG")

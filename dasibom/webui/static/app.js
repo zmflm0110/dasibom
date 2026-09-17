@@ -460,6 +460,7 @@ el("#phone-connect-btn").addEventListener("click", async () => {
     const info = await api("/api/pair-info");
     el("#phone-qr").src = `/api/qr.png?_=${Date.now()}`;
     el("#phone-url").textContent = info.hostname_url || info.lan_url;
+    el("#phone-url-ip").textContent = info.lan_url;
     el("#phone-pin").textContent = info.pin;
     el("#phone-modal").hidden = false;
   } catch {
