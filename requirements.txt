@@ -1,0 +1,4 @@
+pyobjc-framework-Cocoa
+scikit-learn
+numpy
+sentence-transformers
