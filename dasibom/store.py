@@ -56,8 +56,21 @@ _MIGRATIONS = [
 
 def connect(db_path: Path = DB_PATH) -> sqlite3.Connection:
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(db_path))
+    conn = sqlite3.connect(str(db_path), timeout=30.0)
     conn.row_factory = sqlite3.Row
+
+    # Three writers share this file: Flask handlers, the understander worker
+    # (a write every ~2s), and the clipboard monitor. Measured on the default
+    # rollback journal, four concurrent writers produced 183k "database is
+    # locked" errors in 6 seconds -- a bulk import while the worker runs would
+    # have silently dropped screenshots.
+    #   WAL           readers no longer block the writer, and vice versa
+    #   busy_timeout  wait for the lock instead of failing instantly
+    #   NORMAL sync   safe under WAL, and much faster than FULL
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=30000")
+    conn.execute("PRAGMA synchronous=NORMAL")
+
     conn.executescript(SCHEMA)
     cols = {row["name"] for row in conn.execute("PRAGMA table_info(clips)")}
     for name, sql_type in _MIGRATIONS:
