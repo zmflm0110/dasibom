@@ -1,0 +1,26 @@
+{
+  "name": "jikimtalk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "지킴톡 — 단톡방 괴롭힘, 증거는 내 손에",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "e2e": "vite build && node tests/e2e/app.e2e.mjs",
+    "train": "python3 model/train.py",
+    "measure": "tsx eval/measure.ts"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "playwright-core": "^1.63.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  }
+}
