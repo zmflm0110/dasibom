@@ -12,7 +12,7 @@ const EXAMPLE = readFileSync(new URL('../public/samples/example-android.txt', im
 
 describe('다듬기는 파이썬(학습)과 똑같다', () => {
   const cases = JSON.parse(readFileSync(new URL('./parity.json', import.meta.url), 'utf8'));
-  it.each(cases.map((c: { in: string }) => [c.in, c]))('%s', (_s, c: { in: string; norm: string; ngrams: string[] }) => {
+  it.each(cases as { in: string; norm: string; ngrams: string[] }[])('$in', (c) => {
     expect(normalize(c.in)).toBe(c.norm);
     expect(ngrams(c.in)).toEqual(c.ngrams);
   });
@@ -156,5 +156,36 @@ describe('나를 향한 말 판단', () => {
   it('별명으로 불러도 안다', () => {
     const c = parseChat(at('9:00', '가', '뚱민 꺼져'));
     expect(analyze(c, { me: '김민지', aliases: ['뚱민'] }).flags[0].toMe).toBe('name');
+  });
+});
+
+import { textReport, sha256 } from '../src/core/report';
+
+describe('보고서', () => {
+  const chat = parseChat(EXAMPLE);
+  const a = analyze(chat, { me: '김민지', score, threshold: model.threshold });
+  const picked = a.flags.filter((f) => f.toMe);
+  const src = { name: 'KakaoTalk_2학년3반.txt', bytes: 3000, sha256: 'ab'.repeat(32), lines: 60 };
+  const r = textReport(chat, a, picked, '김민지', src, new Date(2026, 8, 15, 21, 30).getTime());
+  it('원문·시각·원본 줄 번호·지문이 들어간다', () => {
+    expect(r).toContain('SHA-256: ' + 'ab'.repeat(32));
+    expect(r).toContain('▶ [14:21] 박서준: 그럼 학교에서 보자');
+    expect(r).toContain('니 얼굴 보면\n      토 나와');
+    expect(r).toMatch(/원본 \d+번째 줄/);
+    expect(r).toContain('카톡감옥');
+    expect(r).toContain('방폭');
+  });
+  it('판단하는 말은 쓰지 않는다', () => {
+    for (const w of ['가해자', '가해 학생', '학교폭력입니다', '범죄']) expect(r).not.toContain(w);
+  });
+  it('고르지 않은 말은 표시(▶)하지 않는다', () => {
+    expect(r).not.toContain('▶ [16:20] 한지우');
+  });
+  it('앞뒤 대화가 겹치면 한 번만', () => {
+    const lines = r.split('\n').filter((l) => l.includes('냄새나서 치운 거 아님?'));
+    expect(lines).toHaveLength(1);
+  });
+  it('SHA-256', async () => {
+    expect(await sha256(new TextEncoder().encode('abc').buffer as ArrayBuffer)).toBe('ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
   });
 });

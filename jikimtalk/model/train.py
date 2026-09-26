@@ -106,6 +106,7 @@ def main():
         'about': '공격적인 말 점수. 학습: kocohub/korean-hate-speech(CC BY-SA 4.0), 2runo/Curse-detection-data(MIT). 모델 파일도 CC BY-SA 4.0.',
         'ngram': [1, 3], 'bias': bias, 'threshold': thr, 'weights': keep,
     }, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+    (Path(__file__).parent / 'splits.json').write_text(json.dumps({'chat_test': [t for t, _ in d_test], 'curse_test': c_test}, ensure_ascii=False), encoding='utf-8')
     (Path(__file__).parent / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=1), encoding='utf-8')
     print(f'n-그램 {len(keep)}개, 기준값 {thr}, 파일 {OUT.stat().st_size // 1024}KB')
     for r in results:
