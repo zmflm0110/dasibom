@@ -31,6 +31,7 @@ const shot = (name) => page.screenshot({ path: `docs/img/${name}.png` });
 
 async function upload(file, lastModified) {
   const b64 = readFileSync(new URL(`../../eval/fixtures/${file}`, import.meta.url)).toString('base64');
+  await page.locator('[data-testid=album-input]').waitFor({ state: 'attached' });
   await page.evaluate(({ b64, file, lastModified }) => {
     const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
     const dt = new DataTransfer();
@@ -191,6 +192,28 @@ await step('7일 뒤: 확인 카드 → 전부 가리고 한 번씩 → 결과�
   assert.equal(csv[0], 'subject,photo,group,reviews,final_knew');
   assert.equal(csv.length - 1, expBlanks);
   assert.ok(csv[1].startsWith('역사') || csv[1].startsWith('과학') || csv[1].includes(','));
+});
+
+await step('백업: 내보내서 새 폰(빈 브라우저)에 가져오면 사진·빈칸·일정이 그대로', async () => {
+  await page.goto(BASE + '#/about');
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.getByTestId('export').click()]);
+  const file = await dl.path();
+  const before = await dueCount().catch(() => null);
+  const fresh = await browser.newContext({ viewport: { width: 390, height: 844 }, timezoneId: 'Asia/Seoul' });
+  const p2 = await fresh.newPage();
+  await p2.clock.setFixedTime(new Date(T0 + 14 * D + 60_000));
+  await p2.goto(BASE + '#/about');
+  await p2.getByTestId('import-input').setInputFiles(file);
+  await p2.getByText('판서 2장을 가져왔어요').waitFor();
+  await p2.getByTestId('import-input').setInputFiles(file); // 두 번 가져와도 두 벌이 안 된다
+  await p2.getByText('판서 0장을 가져왔어요').waitFor();
+  await p2.goto(BASE);
+  assert.equal(await p2.locator('.thumb').count(), 2);
+  await page.goto(BASE);
+  assert.equal(Number(await p2.locator('[data-testid=due-count]').textContent()), await dueCount());
+  await p2.getByText('과학').first().waitFor();
+  await fresh.close();
+  void before;
 });
 
 await step('폰 폭 360px에서 가로 스크롤 없음(모든 화면)', async () => {

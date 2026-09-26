@@ -80,3 +80,43 @@ export const setTimetable = (t: Timetable) => kvSet('timetable', t);
 export interface Settings { experiment: boolean }
 export const getSettings = () => kvGet<Settings>('settings', { experiment: false });
 export const setSettings = (s: Settings) => kvSet('settings', s);
+
+// ───── 백업: 기록이 이 기기에만 있으니 폰을 바꿀 때 옮길 길이 필요하다 ─────
+
+export interface Backup {
+  app: 'jjikpul';
+  version: 1;
+  exportedAt: number;
+  photos: (Photo & { image: string })[];
+  blanks: Blank[];
+  timetable: Timetable;
+  settings: Settings;
+}
+
+const toDataUrl = (b: Blob) => new Promise<string>((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result as string); r.onerror = () => rej(r.error); r.readAsDataURL(b); });
+
+export async function exportAll(): Promise<Backup> {
+  const [photos, blanks, timetable, settings] = await Promise.all([allPhotos(), allBlanks(), getTimetable(), getSettings()]);
+  const withImages = [];
+  for (const p of photos) { const img = await getImage(p.id); withImages.push({ ...p, image: img ? await toDataUrl(img) : '' }); }
+  return { app: 'jjikpul', version: 1, exportedAt: Date.now(), photos: withImages, blanks, timetable, settings };
+}
+
+/** 합치기: 같은 사진(id)은 건너뛴다 — 두 번 가져와도 두 벌이 되지 않게. 가져온 사진 수를 돌려준다. */
+export async function importAll(data: unknown): Promise<number> {
+  const b = data as Backup;
+  if (!b || b.app !== 'jjikpul' || b.version !== 1 || !Array.isArray(b.photos) || !Array.isArray(b.blanks)) throw new Error('찍풀 백업 파일이 아니에요');
+  const have = new Set((await allPhotos()).map((p) => p.id));
+  let n = 0;
+  for (const { image, ...p } of b.photos) {
+    if (have.has(p.id) || !image.startsWith('data:image/')) continue;
+    const blob = await (await fetch(image)).blob();
+    await savePhoto(p, blob, b.blanks.filter((x) => x.photoId === p.id));
+    n++;
+  }
+  if (b.timetable && Object.values(b.timetable.grid ?? {}).some((r) => r.some(Boolean))) {
+    const cur = await getTimetable();
+    if (!Object.values(cur.grid).some((r) => r.some(Boolean))) await setTimetable(b.timetable);
+  }
+  return n;
+}

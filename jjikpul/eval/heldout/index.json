@@ -1,0 +1,650 @@
+[
+ {
+  "file": "sci2-slide-clean.jpg",
+  "board": "sci2",
+  "style": "slide",
+  "cond": "clean",
+  "keys": [
+   "세포",
+   "체세포",
+   "염색체",
+   "감수",
+   "절반",
+   "생식세포"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "sci2-slide-tilt-jpeg.jpg",
+  "board": "sci2",
+  "style": "slide",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "세포",
+   "체세포",
+   "염색체",
+   "감수",
+   "절반",
+   "생식세포"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "sci2-slide-hard.jpg",
+  "board": "sci2",
+  "style": "slide",
+  "cond": "hard",
+  "keys": [
+   "세포",
+   "체세포",
+   "염색체",
+   "감수",
+   "절반",
+   "생식세포"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "sci2-white-clean.jpg",
+  "board": "sci2",
+  "style": "white",
+  "cond": "clean",
+  "keys": [
+   "세포",
+   "체세포",
+   "염색체",
+   "감수",
+   "절반",
+   "생식세포"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "sci2-white-tilt-jpeg.jpg",
+  "board": "sci2",
+  "style": "white",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "세포",
+   "체세포",
+   "염색체",
+   "감수",
+   "절반",
+   "생식세포"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "sci2-white-hard.jpg",
+  "board": "sci2",
+  "style": "white",
+  "cond": "hard",
+  "keys": [
+   "세포",
+   "체세포",
+   "염색체",
+   "감수",
+   "절반",
+   "생식세포"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "sci2-chalk-clean.jpg",
+  "board": "sci2",
+  "style": "chalk",
+  "cond": "clean",
+  "keys": [
+   "세포",
+   "체세포",
+   "염색체",
+   "감수",
+   "절반",
+   "생식세포"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "sci2-chalk-tilt-jpeg.jpg",
+  "board": "sci2",
+  "style": "chalk",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "세포",
+   "체세포",
+   "염색체",
+   "감수",
+   "절반",
+   "생식세포"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "sci2-chalk-hard.jpg",
+  "board": "sci2",
+  "style": "chalk",
+  "cond": "hard",
+  "keys": [
+   "세포",
+   "체세포",
+   "염색체",
+   "감수",
+   "절반",
+   "생식세포"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "geo-slide-clean.jpg",
+  "board": "geo",
+  "style": "slide",
+  "cond": "clean",
+  "keys": [
+   "기후",
+   "열대",
+   "건조",
+   "강수량",
+   "증발량",
+   "온대",
+   "사계절"
+  ],
+  "subject": "사회"
+ },
+ {
+  "file": "geo-slide-tilt-jpeg.jpg",
+  "board": "geo",
+  "style": "slide",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "기후",
+   "열대",
+   "건조",
+   "강수량",
+   "증발량",
+   "온대",
+   "사계절"
+  ],
+  "subject": "사회"
+ },
+ {
+  "file": "geo-slide-hard.jpg",
+  "board": "geo",
+  "style": "slide",
+  "cond": "hard",
+  "keys": [
+   "기후",
+   "열대",
+   "건조",
+   "강수량",
+   "증발량",
+   "온대",
+   "사계절"
+  ],
+  "subject": "사회"
+ },
+ {
+  "file": "geo-white-clean.jpg",
+  "board": "geo",
+  "style": "white",
+  "cond": "clean",
+  "keys": [
+   "기후",
+   "열대",
+   "건조",
+   "강수량",
+   "증발량",
+   "온대",
+   "사계절"
+  ],
+  "subject": "사회"
+ },
+ {
+  "file": "geo-white-tilt-jpeg.jpg",
+  "board": "geo",
+  "style": "white",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "기후",
+   "열대",
+   "건조",
+   "강수량",
+   "증발량",
+   "온대",
+   "사계절"
+  ],
+  "subject": "사회"
+ },
+ {
+  "file": "geo-white-hard.jpg",
+  "board": "geo",
+  "style": "white",
+  "cond": "hard",
+  "keys": [
+   "기후",
+   "열대",
+   "건조",
+   "강수량",
+   "증발량",
+   "온대",
+   "사계절"
+  ],
+  "subject": "사회"
+ },
+ {
+  "file": "geo-chalk-clean.jpg",
+  "board": "geo",
+  "style": "chalk",
+  "cond": "clean",
+  "keys": [
+   "기후",
+   "열대",
+   "건조",
+   "강수량",
+   "증발량",
+   "온대",
+   "사계절"
+  ],
+  "subject": "사회"
+ },
+ {
+  "file": "geo-chalk-tilt-jpeg.jpg",
+  "board": "geo",
+  "style": "chalk",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "기후",
+   "열대",
+   "건조",
+   "강수량",
+   "증발량",
+   "온대",
+   "사계절"
+  ],
+  "subject": "사회"
+ },
+ {
+  "file": "geo-chalk-hard.jpg",
+  "board": "geo",
+  "style": "chalk",
+  "cond": "hard",
+  "keys": [
+   "기후",
+   "열대",
+   "건조",
+   "강수량",
+   "증발량",
+   "온대",
+   "사계절"
+  ],
+  "subject": "사회"
+ },
+ {
+  "file": "his2-slide-clean.jpg",
+  "board": "his2",
+  "style": "slide",
+  "cond": "clean",
+  "keys": [
+   "1392년",
+   "이성계",
+   "위화도",
+   "한양",
+   "성리학"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "his2-slide-tilt-jpeg.jpg",
+  "board": "his2",
+  "style": "slide",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "1392년",
+   "이성계",
+   "위화도",
+   "한양",
+   "성리학"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "his2-slide-hard.jpg",
+  "board": "his2",
+  "style": "slide",
+  "cond": "hard",
+  "keys": [
+   "1392년",
+   "이성계",
+   "위화도",
+   "한양",
+   "성리학"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "his2-white-clean.jpg",
+  "board": "his2",
+  "style": "white",
+  "cond": "clean",
+  "keys": [
+   "1392년",
+   "이성계",
+   "위화도",
+   "한양",
+   "성리학"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "his2-white-tilt-jpeg.jpg",
+  "board": "his2",
+  "style": "white",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "1392년",
+   "이성계",
+   "위화도",
+   "한양",
+   "성리학"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "his2-white-hard.jpg",
+  "board": "his2",
+  "style": "white",
+  "cond": "hard",
+  "keys": [
+   "1392년",
+   "이성계",
+   "위화도",
+   "한양",
+   "성리학"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "his2-chalk-clean.jpg",
+  "board": "his2",
+  "style": "chalk",
+  "cond": "clean",
+  "keys": [
+   "1392년",
+   "이성계",
+   "위화도",
+   "한양",
+   "성리학"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "his2-chalk-tilt-jpeg.jpg",
+  "board": "his2",
+  "style": "chalk",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "1392년",
+   "이성계",
+   "위화도",
+   "한양",
+   "성리학"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "his2-chalk-hard.jpg",
+  "board": "his2",
+  "style": "chalk",
+  "cond": "hard",
+  "keys": [
+   "1392년",
+   "이성계",
+   "위화도",
+   "한양",
+   "성리학"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "eng-slide-clean.jpg",
+  "board": "eng",
+  "style": "slide",
+  "cond": "clean",
+  "keys": [
+   "현재완료",
+   "have",
+   "경험",
+   "계속",
+   "visited",
+   "lived"
+  ],
+  "subject": "영어"
+ },
+ {
+  "file": "eng-slide-tilt-jpeg.jpg",
+  "board": "eng",
+  "style": "slide",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "현재완료",
+   "have",
+   "경험",
+   "계속",
+   "visited",
+   "lived"
+  ],
+  "subject": "영어"
+ },
+ {
+  "file": "eng-slide-hard.jpg",
+  "board": "eng",
+  "style": "slide",
+  "cond": "hard",
+  "keys": [
+   "현재완료",
+   "have",
+   "경험",
+   "계속",
+   "visited",
+   "lived"
+  ],
+  "subject": "영어"
+ },
+ {
+  "file": "eng-white-clean.jpg",
+  "board": "eng",
+  "style": "white",
+  "cond": "clean",
+  "keys": [
+   "현재완료",
+   "have",
+   "경험",
+   "계속",
+   "visited",
+   "lived"
+  ],
+  "subject": "영어"
+ },
+ {
+  "file": "eng-white-tilt-jpeg.jpg",
+  "board": "eng",
+  "style": "white",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "현재완료",
+   "have",
+   "경험",
+   "계속",
+   "visited",
+   "lived"
+  ],
+  "subject": "영어"
+ },
+ {
+  "file": "eng-white-hard.jpg",
+  "board": "eng",
+  "style": "white",
+  "cond": "hard",
+  "keys": [
+   "현재완료",
+   "have",
+   "경험",
+   "계속",
+   "visited",
+   "lived"
+  ],
+  "subject": "영어"
+ },
+ {
+  "file": "eng-chalk-clean.jpg",
+  "board": "eng",
+  "style": "chalk",
+  "cond": "clean",
+  "keys": [
+   "현재완료",
+   "have",
+   "경험",
+   "계속",
+   "visited",
+   "lived"
+  ],
+  "subject": "영어"
+ },
+ {
+  "file": "eng-chalk-tilt-jpeg.jpg",
+  "board": "eng",
+  "style": "chalk",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "현재완료",
+   "have",
+   "경험",
+   "계속",
+   "visited",
+   "lived"
+  ],
+  "subject": "영어"
+ },
+ {
+  "file": "eng-chalk-hard.jpg",
+  "board": "eng",
+  "style": "chalk",
+  "cond": "hard",
+  "keys": [
+   "현재완료",
+   "have",
+   "경험",
+   "계속",
+   "visited",
+   "lived"
+  ],
+  "subject": "영어"
+ },
+ {
+  "file": "math-slide-clean.jpg",
+  "board": "math",
+  "style": "slide",
+  "cond": "clean",
+  "keys": [
+   "일차함수",
+   "기울기",
+   "절편"
+  ],
+  "subject": "수학"
+ },
+ {
+  "file": "math-slide-tilt-jpeg.jpg",
+  "board": "math",
+  "style": "slide",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "일차함수",
+   "기울기",
+   "절편"
+  ],
+  "subject": "수학"
+ },
+ {
+  "file": "math-slide-hard.jpg",
+  "board": "math",
+  "style": "slide",
+  "cond": "hard",
+  "keys": [
+   "일차함수",
+   "기울기",
+   "절편"
+  ],
+  "subject": "수학"
+ },
+ {
+  "file": "math-white-clean.jpg",
+  "board": "math",
+  "style": "white",
+  "cond": "clean",
+  "keys": [
+   "일차함수",
+   "기울기",
+   "절편"
+  ],
+  "subject": "수학"
+ },
+ {
+  "file": "math-white-tilt-jpeg.jpg",
+  "board": "math",
+  "style": "white",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "일차함수",
+   "기울기",
+   "절편"
+  ],
+  "subject": "수학"
+ },
+ {
+  "file": "math-white-hard.jpg",
+  "board": "math",
+  "style": "white",
+  "cond": "hard",
+  "keys": [
+   "일차함수",
+   "기울기",
+   "절편"
+  ],
+  "subject": "수학"
+ },
+ {
+  "file": "math-chalk-clean.jpg",
+  "board": "math",
+  "style": "chalk",
+  "cond": "clean",
+  "keys": [
+   "일차함수",
+   "기울기",
+   "절편"
+  ],
+  "subject": "수학"
+ },
+ {
+  "file": "math-chalk-tilt-jpeg.jpg",
+  "board": "math",
+  "style": "chalk",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "일차함수",
+   "기울기",
+   "절편"
+  ],
+  "subject": "수학"
+ },
+ {
+  "file": "math-chalk-hard.jpg",
+  "board": "math",
+  "style": "chalk",
+  "cond": "hard",
+  "keys": [
+   "일차함수",
+   "기울기",
+   "절편"
+  ],
+  "subject": "수학"
+ }
+]

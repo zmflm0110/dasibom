@@ -560,11 +560,19 @@ async function experiment() {
 // ───────────── 도움말 ─────────────
 
 function about() {
+  const restoreInput = h('input', { type: 'file', accept: 'application/json,.json', class: 'hidden', 'data-testid': 'import-input' });
+  restoreInput.addEventListener('change', async () => {
+    const f = restoreInput.files?.[0];
+    if (!f) return;
+    try { const n = await db.importAll(JSON.parse(await f.text())); toast(`판서 ${n}장을 가져왔어요`); }
+    catch (e) { toast(e instanceof Error && e.message.includes('백업') ? e.message : '파일을 읽지 못했어요'); }
+    restoreInput.value = '';
+  });
   const time = h('input', { type: 'time', value: '19:00', 'aria-label': '알림 시각' });
   screen('도움말',
     h('section', { class: 'card prose' },
       h('h2', {}, '왜 빈칸인가요?'),
-      h('p', {}, '판서를 찍기만 하면 머리는 "저장했다"고 믿고 잊어버려요. 사진을 다시 ', h('b', {}, '읽는 것'), '보다 가리고 ', h('b', {}, '떠올려 보는 것'), '이 훨씬 오래 남아요(인출 연습). 잊을 때쯤(저녁 → 3일 → 7일 → 14일) 다시 떠올리면 더 오래가요(간격 반복).'),
+      h('p', {}, '판서를 찍기만 하면 머리는 "저장했다"고 믿고 잊어버려요. 사진을 다시 ', h('b', {}, '읽는 것'), '보다 가리고 ', h('b', {}, '떠올려 보는 것'), '이 훨씬 오래 남아요. 잊을 때쯤(저녁 → 1일 → 3일 → 7일 → 14일) 다시 떠올리면 더 오래가요.'),
       h('h2', {}, '정답이 틀릴 수는 없나요?'),
       h('p', {}, '정답은 AI가 쓴 글자가 아니라 ', h('b', {}, '선생님 판서 사진 그 자체'), '예요. 글자 찾기는 "어디를 가릴지" 추천만 해요. 추천이 틀리면 톡 눌러 고치면 돼요.'),
       h('h2', {}, '내 사진은 어디로 가나요?'),
@@ -572,7 +580,17 @@ function about() {
     h('section', { class: 'card' },
       h('h2', {}, '⏰ 복습 알림'),
       h('p', { class: 'muted' }, '폰 캘린더에 매일 복습 일정을 넣어요.'),
-      h('div', { class: 'row' }, time, h('button', { class: 'big ghost', onclick: () => download('찍풀-복습-알림.ics', reminderIcs(time.value, location.href.split('#')[0]), 'text/calendar') }, '캘린더에 넣기'))));
+      h('div', { class: 'row' }, time, h('button', { class: 'big ghost', onclick: () => download('찍풀-복습-알림.ics', reminderIcs(time.value, location.href.split('#')[0]), 'text/calendar') }, '캘린더에 넣기'))),
+    h('section', { class: 'card' },
+      h('h2', {}, '💾 폰 바꿀 때'),
+      h('p', { class: 'muted' }, '기록은 이 폰에만 있어요. 백업 파일로 내보내서 새 폰에서 가져오세요.'),
+      h('div', { class: 'row' },
+        h('button', { class: 'big ghost', 'data-testid': 'export', onclick: async () => {
+          const data = await db.exportAll();
+          download(`찍풀-백업-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(data), 'application/json');
+        } }, '내보내기'),
+        restoreInput,
+        h('button', { class: 'big ghost', onclick: () => restoreInput.click() }, '가져오기'))));
 }
 
 route();
