@@ -193,3 +193,11 @@ for f in tests/test_*.py; do python3 "$f"; done
 | `mobile_layout.py` | 폰 폭(390px) 실제 렌더링 측정 9종 |
 | `loadtest.py` | 3,000장 규모에서의 검색 지연 |
 | `test_concurrency.py` | 동시 쓰기/읽기 (WAL) — 유실·잠금 오류 0건 |
+
+---
+
+## 형제 프로젝트: [찍풀](jjikpul/)
+
+다시봄이 스크린샷을 "필요할 때 꺼내 준다"면, 찍풀은 판서 사진을 "잊을 때쯤 떠올리게" 합니다.
+판서 속 중요한 말을 빈칸으로 가리고 1·3·7·14일 간격으로 다시 풉니다. 정답은 판서 사진 그 자체라 AI가 틀려도 정답은 안 틀립니다.
+자세한 내용: [`jjikpul/README.md`](jjikpul/README.md)
