@@ -1,0 +1,4 @@
+public/tess/
+node_modules/
+dist/
+eval/.lang/

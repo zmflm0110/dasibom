@@ -1,0 +1,17 @@
+{
+  "name": "찍풀 — 찍고, 풀고",
+  "short_name": "찍풀",
+  "description": "판서 사진을 찍으면 빈칸 문제가 되고, 잊을 때쯤 다시 풀게 해요.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f4ee",
+  "theme_color": "#1f2a44",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

@@ -1,0 +1,338 @@
+[
+ {
+  "file": "sci-slide-slide-clean.jpg",
+  "board": "sci-slide",
+  "style": "slide",
+  "cond": "clean",
+  "keys": [
+   "광합성",
+   "빛에너지",
+   "포도당",
+   "엽록체",
+   "이산화",
+   "산소"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "sci-slide-slide-tilt-jpeg.jpg",
+  "board": "sci-slide",
+  "style": "slide",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "광합성",
+   "빛에너지",
+   "포도당",
+   "엽록체",
+   "이산화",
+   "산소"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "sci-slide-white-clean.jpg",
+  "board": "sci-slide",
+  "style": "white",
+  "cond": "clean",
+  "keys": [
+   "광합성",
+   "빛에너지",
+   "포도당",
+   "엽록체",
+   "이산화",
+   "산소"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "sci-slide-white-tilt-jpeg.jpg",
+  "board": "sci-slide",
+  "style": "white",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "광합성",
+   "빛에너지",
+   "포도당",
+   "엽록체",
+   "이산화",
+   "산소"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "sci-slide-chalk-clean.jpg",
+  "board": "sci-slide",
+  "style": "chalk",
+  "cond": "clean",
+  "keys": [
+   "광합성",
+   "빛에너지",
+   "포도당",
+   "엽록체",
+   "이산화",
+   "산소"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "sci-slide-chalk-tilt-jpeg.jpg",
+  "board": "sci-slide",
+  "style": "chalk",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "광합성",
+   "빛에너지",
+   "포도당",
+   "엽록체",
+   "이산화",
+   "산소"
+  ],
+  "subject": "과학"
+ },
+ {
+  "file": "his-slide-slide-clean.jpg",
+  "board": "his-slide",
+  "style": "slide",
+  "cond": "clean",
+  "keys": [
+   "1919년",
+   "33인",
+   "독립",
+   "탑골",
+   "임시"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "his-slide-slide-tilt-jpeg.jpg",
+  "board": "his-slide",
+  "style": "slide",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "1919년",
+   "33인",
+   "독립",
+   "탑골",
+   "임시"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "his-slide-white-clean.jpg",
+  "board": "his-slide",
+  "style": "white",
+  "cond": "clean",
+  "keys": [
+   "1919년",
+   "33인",
+   "독립",
+   "탑골",
+   "임시"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "his-slide-white-tilt-jpeg.jpg",
+  "board": "his-slide",
+  "style": "white",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "1919년",
+   "33인",
+   "독립",
+   "탑골",
+   "임시"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "his-slide-chalk-clean.jpg",
+  "board": "his-slide",
+  "style": "chalk",
+  "cond": "clean",
+  "keys": [
+   "1919년",
+   "33인",
+   "독립",
+   "탑골",
+   "임시"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "his-slide-chalk-tilt-jpeg.jpg",
+  "board": "his-slide",
+  "style": "chalk",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "1919년",
+   "33인",
+   "독립",
+   "탑골",
+   "임시"
+  ],
+  "subject": "역사"
+ },
+ {
+  "file": "kor-slide-slide-clean.jpg",
+  "board": "kor-slide",
+  "style": "slide",
+  "cond": "clean",
+  "keys": [
+   "비유법",
+   "직유법",
+   "은유법",
+   "의인법"
+  ],
+  "subject": "국어"
+ },
+ {
+  "file": "kor-slide-slide-tilt-jpeg.jpg",
+  "board": "kor-slide",
+  "style": "slide",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "비유법",
+   "직유법",
+   "은유법",
+   "의인법"
+  ],
+  "subject": "국어"
+ },
+ {
+  "file": "kor-slide-white-clean.jpg",
+  "board": "kor-slide",
+  "style": "white",
+  "cond": "clean",
+  "keys": [
+   "비유법",
+   "직유법",
+   "은유법",
+   "의인법"
+  ],
+  "subject": "국어"
+ },
+ {
+  "file": "kor-slide-white-tilt-jpeg.jpg",
+  "board": "kor-slide",
+  "style": "white",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "비유법",
+   "직유법",
+   "은유법",
+   "의인법"
+  ],
+  "subject": "국어"
+ },
+ {
+  "file": "kor-slide-chalk-clean.jpg",
+  "board": "kor-slide",
+  "style": "chalk",
+  "cond": "clean",
+  "keys": [
+   "비유법",
+   "직유법",
+   "은유법",
+   "의인법"
+  ],
+  "subject": "국어"
+ },
+ {
+  "file": "kor-slide-chalk-tilt-jpeg.jpg",
+  "board": "kor-slide",
+  "style": "chalk",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "비유법",
+   "직유법",
+   "은유법",
+   "의인법"
+  ],
+  "subject": "국어"
+ },
+ {
+  "file": "soc-slide-slide-clean.jpg",
+  "board": "soc-slide",
+  "style": "slide",
+  "cond": "clean",
+  "keys": [
+   "수요",
+   "공급",
+   "감소",
+   "증가",
+   "균형"
+  ],
+  "subject": "사회"
+ },
+ {
+  "file": "soc-slide-slide-tilt-jpeg.jpg",
+  "board": "soc-slide",
+  "style": "slide",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "수요",
+   "공급",
+   "감소",
+   "증가",
+   "균형"
+  ],
+  "subject": "사회"
+ },
+ {
+  "file": "soc-slide-white-clean.jpg",
+  "board": "soc-slide",
+  "style": "white",
+  "cond": "clean",
+  "keys": [
+   "수요",
+   "공급",
+   "감소",
+   "증가",
+   "균형"
+  ],
+  "subject": "사회"
+ },
+ {
+  "file": "soc-slide-white-tilt-jpeg.jpg",
+  "board": "soc-slide",
+  "style": "white",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "수요",
+   "공급",
+   "감소",
+   "증가",
+   "균형"
+  ],
+  "subject": "사회"
+ },
+ {
+  "file": "soc-slide-chalk-clean.jpg",
+  "board": "soc-slide",
+  "style": "chalk",
+  "cond": "clean",
+  "keys": [
+   "수요",
+   "공급",
+   "감소",
+   "증가",
+   "균형"
+  ],
+  "subject": "사회"
+ },
+ {
+  "file": "soc-slide-chalk-tilt-jpeg.jpg",
+  "board": "soc-slide",
+  "style": "chalk",
+  "cond": "tilt-jpeg",
+  "keys": [
+   "수요",
+   "공급",
+   "감소",
+   "증가",
+   "균형"
+  ],
+  "subject": "사회"
+ }
+]
